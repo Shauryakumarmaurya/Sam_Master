@@ -31,7 +31,7 @@ export default function RootLayout({ children }) {
     <html lang="en" className={`${inter.variable} antialiased`} style={{ background: '#f9fafb' }}>
       <head>
         <link rel="manifest" href="/manifest.json" />
-        <link rel="apple-touch-icon" href="/logo.png" />
+        <link rel="apple-touch-icon" href="/app-icon.png" />
       </head>
       <body style={{ background: '#f9fafb', minHeight: '100vh' }}>{children}</body>
     </html>
