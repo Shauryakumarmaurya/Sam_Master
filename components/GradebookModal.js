@@ -1,5 +1,6 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useApp } from './AppProvider';
+import { useModalHistory } from '@/hooks/useModalHistory';
 import * as htmlToImage from 'html-to-image';
 import { jsPDF } from 'jspdf';
 
@@ -27,6 +28,9 @@ export default function GradebookModal() {
   const [newSubject, setNewSubject] = useState('');
   const [newExam, setNewExam] = useState('');
   const [newExamMaxMarks, setNewExamMaxMarks] = useState('100');
+
+  const closeGradebook = useCallback(() => setShowGradebook(false), [setShowGradebook]);
+  useModalHistory(closeGradebook);
 
   const [selectedExamId, setSelectedExamId] = useState('');
   const [selectedSubjectId, setSelectedSubjectId] = useState('');
@@ -187,7 +191,7 @@ export default function GradebookModal() {
             <p className="text-sm text-gray-500">Manage subjects, exams, and student performance.</p>
           </div>
           <button
-            onClick={() => setShowGradebook(false)}
+            onClick={closeGradebook}
             className="rounded-full p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
           >
             <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor">

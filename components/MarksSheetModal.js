@@ -1,7 +1,9 @@
 'use client';
 
+import { useCallback } from 'react';
 import { useApp } from './AppProvider';
 import { parseDateKey, DAY_NAMES, MONTH_NAMES } from '@/utils/dateHelpers';
+import { useModalHistory } from '@/hooks/useModalHistory';
 
 export default function MarksSheetModal() {
   const {
@@ -13,7 +15,10 @@ export default function MarksSheetModal() {
     setMark,
   } = useApp();
 
-  if (!showMarksSheet) return null;
+  const closeMarksSheet = useCallback(() => setShowMarksSheet(false), [setShowMarksSheet]);
+  useModalHistory(closeMarksSheet);
+
+  if (!showMarksSheet || !selectedDate) return null;
 
   const dateObj = parseDateKey(selectedDate);
   const dayName = DAY_NAMES[dateObj.getDay()];
@@ -23,8 +28,9 @@ export default function MarksSheetModal() {
   const todayMarks = marks[selectedDate] || {};
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 backdrop-blur-sm p-4 sm:p-6">
-      <div className="flex max-h-full w-full max-w-lg flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+      <div className="absolute inset-0 bg-gray-900/50 backdrop-blur-sm" onClick={closeMarksSheet} />
+      <div className="relative flex max-h-full w-full max-w-lg flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4 bg-gray-50/50">
           <div>
@@ -32,7 +38,7 @@ export default function MarksSheetModal() {
             <p className="text-sm text-gray-500">{displayDate}</p>
           </div>
           <button
-            onClick={() => setShowMarksSheet(false)}
+            onClick={closeMarksSheet}
             className="rounded-full p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
           >
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor">

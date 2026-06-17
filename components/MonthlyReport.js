@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { useApp } from './AppProvider';
+import { useModalHistory } from '@/hooks/useModalHistory';
+import { useCallback } from 'react';
 import {
   getWorkingDays,
   getWorkingDateKeys,
@@ -11,6 +13,9 @@ import {
 
 export default function MonthlyReport() {
   const { students, attendance, holidays, showReport, setShowReport } = useApp();
+
+  const closeReport = useCallback(() => setShowReport(false), [setShowReport]);
+  useModalHistory(closeReport);
 
   const now = new Date();
   const [reportYear, setReportYear] = useState(now.getFullYear());
@@ -62,7 +67,7 @@ export default function MonthlyReport() {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/30" onClick={() => setShowReport(false)} />
+      <div className="absolute inset-0 bg-black/30" onClick={closeReport} />
 
       {/* Modal */}
       <div className="relative max-h-[85vh] w-full max-w-2xl overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl">
@@ -70,8 +75,7 @@ export default function MonthlyReport() {
         <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
           <h2 className="text-base font-semibold text-gray-900">Monthly Report</h2>
           <button
-            id="btn-close-report"
-            onClick={() => setShowReport(false)}
+            onClick={closeReport}
             className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-900 transition-colors"
             aria-label="Close"
           >

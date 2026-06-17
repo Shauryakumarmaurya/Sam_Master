@@ -2,9 +2,14 @@
 
 import { useApp } from './AppProvider';
 import { parseDateKey } from '@/utils/dateHelpers';
+import { useModalHistory } from '@/hooks/useModalHistory';
+import { useCallback } from 'react';
 
 export default function AttendanceSheetModal() {
   const { students, attendance, selectedDate, markAttendance, markAllAttendance, showAttendance, setShowAttendance } = useApp();
+
+  const closeAttendance = useCallback(() => setShowAttendance(false), [setShowAttendance]);
+  useModalHistory(closeAttendance);
 
   if (!showAttendance || !selectedDate) return null;
 
@@ -18,7 +23,7 @@ export default function AttendanceSheetModal() {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/30" onClick={() => setShowAttendance(false)} />
+      <div className="absolute inset-0 bg-black/30" onClick={closeAttendance} />
 
       {/* Modal */}
       <div className="relative max-h-[85vh] w-full max-w-2xl overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl flex flex-col">
@@ -29,7 +34,7 @@ export default function AttendanceSheetModal() {
             <p className="text-xs text-gray-500">{dateLabel}</p>
           </div>
           <button
-            onClick={() => setShowAttendance(false)}
+            onClick={closeAttendance}
             className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-900 transition-colors"
             aria-label="Close"
           >
