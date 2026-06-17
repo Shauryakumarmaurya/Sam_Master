@@ -395,17 +395,17 @@ export default function GradebookModal() {
               </div>
 
               {selectedStudentId && (
-                <div ref={reportWrapperRef} className="w-full relative mb-6">
+                <div ref={reportWrapperRef} className="w-full overflow-hidden mb-6">
                   <div 
                     ref={reportCardRef} 
-                    className="print-section absolute top-0 left-[50%] -ml-[400px] rounded-2xl border border-gray-200 bg-white p-12 shadow-2xl w-[800px]"
+                    className="print-section rounded-2xl border border-gray-200 bg-white p-8 sm:p-12 shadow-2xl w-[800px]"
                     style={{
                       transform: `scale(${reportScale})`,
-                      transformOrigin: 'top center'
+                      transformOrigin: 'top left'
                     }}
                   >
                   {/* Action Bar (Not Printed) */}
-                  <div className="absolute top-6 right-6 no-print z-10" style={{ transform: reportScale < 1 ? `scale(${1/reportScale})` : 'none', transformOrigin: 'top right' }}>
+                  <div className="absolute top-4 right-4 no-print z-10">
                     <button 
                       onClick={handleDownloadPDF} 
                       disabled={isDownloading}
