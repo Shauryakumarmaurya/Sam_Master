@@ -173,7 +173,28 @@ export default function GradebookModal() {
       const xOffset = (pdf.internal.pageSize.getWidth() - pdfWidth) / 2;
       
       pdf.addImage(imgData, 'PNG', xOffset, 0, pdfWidth, pdfHeight);
-      pdf.save(`${students.find(s => s.id === selectedStudentId)?.name || 'Student'}_Report_Card.pdf`);
+      const filename = `${students.find(s => s.id === selectedStudentId)?.name || 'Student'}_Report_Card.pdf`;
+      
+      try {
+        const blob = pdf.output('blob');
+        const file = new File([blob], filename, { type: 'application/pdf' });
+        
+        // Use native iOS/Android Share Sheet to prevent WebKitBlobResource history corruption
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title: filename,
+          });
+        } else {
+          pdf.save(filename);
+        }
+      } catch (err) {
+        console.error('Share/Save error:', err);
+        if (err.name !== 'AbortError') {
+          // Fallback if sharing fails for some reason
+          pdf.save(filename);
+        }
+      }
     } catch (error) {
       console.error('Failed to generate PDF', error);
     } finally {
