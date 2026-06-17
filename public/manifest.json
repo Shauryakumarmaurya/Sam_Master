@@ -1,6 +1,6 @@
 {
-  "name": "Academic Gradebook",
-  "short_name": "Gradebook",
+  "name": "7AM Gradebook",
+  "short_name": "7AM Gradebook",
   "description": "Student Attendance and Gradebook Manager",
   "start_url": "/",
   "display": "standalone",

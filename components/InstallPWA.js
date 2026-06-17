@@ -90,7 +90,7 @@ export default function InstallPWA() {
               <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-purple-100">
                 <img src="/logo.png" alt="App Icon" className="h-12 w-12 rounded-xl object-contain" />
               </div>
-              <h3 className="mb-2 text-lg font-bold text-gray-900">Install Gradebook App</h3>
+              <h3 className="mb-2 text-lg font-bold text-gray-900">Install 7AM Gradebook</h3>
               <p className="mb-6 text-sm text-gray-500">Install this app on your iPhone for quick access.</p>
               
               <div className="space-y-4 text-left bg-gray-50 p-4 rounded-xl">

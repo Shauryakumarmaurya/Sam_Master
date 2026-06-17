@@ -8,10 +8,14 @@ const inter = Inter({
 });
 
 export const metadata = {
-  title: "Student Attendance Manager",
+  title: "7AM Gradebook",
   description:
     "A modern attendance management tool for school teachers. Track student attendance, mark holidays, and generate monthly reports.",
   keywords: ["attendance", "teacher", "school", "students", "calendar"],
+  appleWebApp: {
+    title: "7AM Gradebook",
+    statusBarStyle: "default",
+  },
 };
 
 export const viewport = {
