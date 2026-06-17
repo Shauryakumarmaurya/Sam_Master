@@ -35,6 +35,36 @@ export default function GradebookModal() {
   const [isDownloading, setIsDownloading] = useState(false);
   const [shareLinkCopied, setShareLinkCopied] = useState(false);
   const reportCardRef = useRef(null);
+  const reportWrapperRef = useRef(null);
+  const [reportScale, setReportScale] = useState(1);
+
+  useEffect(() => {
+    if (activeTab === 'report' && selectedStudentId && reportCardRef.current && reportWrapperRef.current) {
+      const updateScale = () => {
+        if (!reportWrapperRef.current || !reportCardRef.current) return;
+        const parentWidth = reportWrapperRef.current.parentElement.clientWidth;
+        if (parentWidth < 800) {
+          const newScale = (parentWidth - 32) / 800; // 32px for padding
+          setReportScale(newScale);
+          reportWrapperRef.current.style.height = `${reportCardRef.current.scrollHeight * newScale}px`;
+        } else {
+          setReportScale(1);
+          reportWrapperRef.current.style.height = 'auto';
+        }
+      };
+      
+      updateScale();
+      window.addEventListener('resize', updateScale);
+      
+      const observer = new ResizeObserver(updateScale);
+      if (reportCardRef.current) observer.observe(reportCardRef.current);
+      
+      return () => {
+        window.removeEventListener('resize', updateScale);
+        observer.disconnect();
+      };
+    }
+  }, [activeTab, selectedStudentId]);
 
   const handleGenerateShareLink = () => {
     if (!selectedExamId || !selectedSubjectId || students.length === 0) return;
@@ -364,10 +394,17 @@ export default function GradebookModal() {
               </div>
 
               {selectedStudentId && (
-                <div className="overflow-x-auto custom-scrollbar w-full pb-6">
-                  <div ref={reportCardRef} className="print-section relative rounded-2xl border border-gray-200 bg-white p-6 sm:p-12 shadow-2xl mx-auto min-w-[800px] w-[210mm]">
+                <div ref={reportWrapperRef} className="w-full relative flex justify-center mb-6">
+                  <div 
+                    ref={reportCardRef} 
+                    className="print-section absolute top-0 rounded-2xl border border-gray-200 bg-white p-12 shadow-2xl min-w-[800px] w-[800px]"
+                    style={{
+                      transform: `scale(${reportScale})`,
+                      transformOrigin: 'top center'
+                    }}
+                  >
                   {/* Action Bar (Not Printed) */}
-                  <div className="absolute top-6 right-6 no-print">
+                  <div className="absolute top-6 right-6 no-print z-10" style={{ transform: reportScale < 1 ? `scale(${1/reportScale})` : 'none', transformOrigin: 'top right' }}>
                     <button 
                       onClick={handleDownloadPDF} 
                       disabled={isDownloading}
