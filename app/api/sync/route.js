@@ -1,5 +1,8 @@
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const rawUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const rawKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+
+const supabaseUrl = rawUrl.replace(/['"]/g, '').trim();
+const supabaseKey = rawKey.replace(/['"]/g, '').trim();
 
 export async function GET() {
   if (!supabaseUrl || !supabaseKey || supabaseUrl.includes('YOUR_PROJECT_ID')) {
@@ -15,7 +18,11 @@ export async function GET() {
       next: { revalidate: 0 } // Ensure Next.js doesn't cache this request
     });
     
-    if (!res.ok) throw new Error('Failed to fetch from Supabase');
+    if (!res.ok) {
+      const txt = await res.text();
+      console.error('Supabase GET error:', res.status, txt);
+      throw new Error(`Failed to fetch from Supabase: ${res.status} ${txt}`);
+    }
     const data = await res.json();
     return Response.json(data);
   } catch (err) {
@@ -55,13 +62,13 @@ export async function POST(req) {
       
     if (!res.ok) {
       const errorText = await res.text();
-      console.error('Supabase error', errorText);
-      throw new Error('Supabase insert failed');
+      console.error('Supabase POST error:', res.status, errorText);
+      throw new Error(`Supabase error: ${res.status} ${errorText}`);
     }
     
     return Response.json({ success: true, id: newEntry.id });
   } catch (error) {
     console.error(error);
-    return Response.json({ success: false, error: 'Failed to save' }, { status: 500 });
+    return Response.json({ success: false, error: error.message || 'Failed to save' }, { status: 500 });
   }
 }

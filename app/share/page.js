@@ -49,7 +49,8 @@ function ShareGradingContent() {
       if (res.ok) {
         setSubmitSuccess(true);
       } else {
-        alert("Failed to submit grades. Please try again.");
+        const errData = await res.json();
+        alert(`Failed to submit grades:\\n${errData.error || 'Unknown error'}`);
       }
     } catch (err) {
       console.error(err);
