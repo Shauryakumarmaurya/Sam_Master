@@ -9,19 +9,6 @@ export default function SyncImportHelper() {
   const [notifications, setNotifications] = useState([]);
   const appDataRef = useRef({ setExamGrade, exams, subjects, students });
 
-  // Hydrate active notifications from local storage on mount
-  useEffect(() => {
-    const saved = loadState('sam_active_notifications', []);
-    if (saved.length > 0) {
-      setNotifications(saved);
-    }
-  }, []);
-
-  // Save active notifications to local storage whenever they change
-  useEffect(() => {
-    saveState('sam_active_notifications', notifications);
-  }, [notifications]);
-
   // Keep ref up to date to avoid stale closures in the interval
   useEffect(() => {
     appDataRef.current = { setExamGrade, exams, subjects, students };
@@ -56,6 +43,11 @@ export default function SyncImportHelper() {
               id: submission.id,
               message: `Marks submitted by the ${subjectName} teacher!`
             }]);
+            
+            // Auto dismiss after 4 seconds
+            setTimeout(() => {
+              setNotifications(prev => prev.filter(x => x.id !== submission.id));
+            }, 4000);
           }
         });
 
