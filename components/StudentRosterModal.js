@@ -103,8 +103,8 @@ export default function StudentRosterModal() {
               <p className="mt-1 text-xs text-gray-400">Type a name or use the microphone</p>
             </div>
           ) : (
-            <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white">
-              <table className="w-full text-sm min-w-[500px]">
+            <div className="rounded-lg border border-gray-200 bg-white">
+              <table className="w-full text-sm">
                 <tbody>
                   {students.map((student, index) => (
                     <tr key={student.id} className="group border-b border-gray-100 last:border-b-0 hover:bg-gray-50/50 transition-colors">

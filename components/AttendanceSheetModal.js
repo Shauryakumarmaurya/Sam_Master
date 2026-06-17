@@ -64,43 +64,43 @@ export default function AttendanceSheetModal() {
               <p className="text-sm text-gray-500">No students added to the roster yet.</p>
             </div>
           ) : (
-            <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white">
-              <table className="w-full text-sm min-w-[500px]">
+            <div className="rounded-lg border border-gray-200 bg-white">
+              <table className="w-full text-sm">
                 <tbody>
                   {students.map((student, index) => {
                     const status = dateAttendance[student.id] || null;
                     return (
                       <tr key={student.id} className="border-b border-gray-100 last:border-b-0 hover:bg-gray-50/50 transition-colors">
-                        <td className="py-3 px-4 w-10 text-center text-xs text-gray-400">{index + 1}</td>
-                        <td className="py-3 px-2">
-                          <div className="flex items-center gap-3">
-                            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-green-50 text-xs font-semibold text-green-700">
+                        <td className="py-3 px-2 sm:px-4 w-8 sm:w-10 text-center text-[10px] sm:text-xs text-gray-400">{index + 1}</td>
+                        <td className="py-3 px-1 sm:px-2">
+                          <div className="flex items-center gap-2 sm:gap-3">
+                            <span className="flex h-6 w-6 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-full bg-green-50 text-[10px] sm:text-xs font-semibold text-green-700">
                               {student.name.charAt(0)}
                             </span>
-                            <span className="font-medium text-gray-900">{student.name}</span>
+                            <span className="font-medium text-gray-900 text-xs sm:text-sm truncate max-w-[80px] sm:max-w-[200px]">{student.name}</span>
                           </div>
                         </td>
-                        <td className="py-3 pr-4 text-right">
-                          <div className="flex justify-end gap-2">
+                        <td className="py-3 pr-2 sm:pr-4 text-right">
+                          <div className="flex justify-end gap-1.5 sm:gap-2">
                             <button
                               onClick={() => markAttendance(selectedDate, student.id, 'present')}
-                              className={`rounded-md px-4 py-1.5 text-xs font-medium transition-colors ${
+                              className={`rounded px-2 sm:px-4 py-1.5 text-[10px] sm:text-xs font-medium transition-colors ${
                                 status === 'present'
                                   ? 'bg-green-600 text-white shadow-sm'
                                   : 'border border-gray-200 bg-white text-gray-600 hover:border-green-300 hover:text-green-600'
                               }`}
                             >
-                              Present
+                              P<span className="hidden sm:inline">resent</span>
                             </button>
                             <button
                               onClick={() => markAttendance(selectedDate, student.id, 'absent')}
-                              className={`rounded-md px-4 py-1.5 text-xs font-medium transition-colors ${
+                              className={`rounded px-2 sm:px-4 py-1.5 text-[10px] sm:text-xs font-medium transition-colors ${
                                 status === 'absent'
                                   ? 'bg-red-600 text-white shadow-sm'
                                   : 'border border-gray-200 bg-white text-gray-600 hover:border-red-300 hover:text-red-600'
                               }`}
                             >
-                              Absent
+                              A<span className="hidden sm:inline">bsent</span>
                             </button>
                           </div>
                         </td>
