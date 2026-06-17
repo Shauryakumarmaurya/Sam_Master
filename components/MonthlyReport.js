@@ -89,7 +89,7 @@ export default function MonthlyReport() {
               id="select-report-month"
               value={reportMonth}
               onChange={(e) => setReportMonth(Number(e.target.value))}
-              className="rounded-md border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-900 outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
+              className="rounded-md border border-gray-200 bg-white px-3 py-1.5 text-base sm:text-sm text-gray-900 outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
             >
               {MONTH_NAMES.map((name, i) => (
                 <option key={i} value={i}>{name}</option>
@@ -99,7 +99,7 @@ export default function MonthlyReport() {
               id="select-report-year"
               value={reportYear}
               onChange={(e) => setReportYear(Number(e.target.value))}
-              className="rounded-md border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-900 outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
+              className="rounded-md border border-gray-200 bg-white px-3 py-1.5 text-base sm:text-sm text-gray-900 outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
             >
               {yearOptions.map((y) => (
                 <option key={y} value={y}>{y}</option>

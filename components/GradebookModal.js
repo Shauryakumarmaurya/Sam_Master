@@ -232,15 +232,15 @@ export default function GradebookModal() {
                 {/* Subjects */}
                 <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
                   <h3 className="mb-4 text-lg font-semibold text-gray-900">Subjects</h3>
-                  <form onSubmit={handleAddSubject} className="mb-6 flex gap-2">
+                  <form onSubmit={handleAddSubject} className="mb-6 flex flex-col sm:flex-row gap-2">
                     <input
                       type="text"
                       placeholder="e.g. Mathematics"
                       value={newSubject}
                       onChange={(e) => setNewSubject(e.target.value)}
-                      className="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
+                      className="flex-1 rounded-md border border-gray-300 px-3 py-2 text-base sm:text-sm outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
                     />
-                    <button type="submit" className="rounded-md bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700">
+                    <button type="submit" className="rounded-md bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700 w-full sm:w-auto mt-2 sm:mt-0">
                       Add
                     </button>
                   </form>
@@ -260,13 +260,13 @@ export default function GradebookModal() {
                 {/* Exams */}
                 <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
                   <h3 className="mb-4 text-lg font-semibold text-gray-900">Exams</h3>
-                  <form onSubmit={handleAddExam} className="mb-6 flex gap-2">
+                  <form onSubmit={handleAddExam} className="mb-6 flex flex-col sm:flex-row gap-2">
                     <input
                       type="text"
                       placeholder="e.g. Unit Test 1"
                       value={newExam}
                       onChange={(e) => setNewExam(e.target.value)}
-                      className="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                      className="flex-1 rounded-md border border-gray-300 px-3 py-2 text-base sm:text-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                     />
                     <div className="relative w-24">
                       <input
@@ -275,11 +275,11 @@ export default function GradebookModal() {
                         min="1"
                         value={newExamMaxMarks}
                         onChange={(e) => setNewExamMaxMarks(e.target.value)}
-                        className="w-full rounded-md border border-gray-300 pl-3 pr-8 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                        className="w-full rounded-md border border-gray-300 pl-3 pr-8 py-2 text-base sm:text-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                       />
-                      <span className="absolute right-3 top-2 text-xs text-gray-400">pts</span>
+                      <span className="absolute right-3 top-2.5 text-xs text-gray-400">pts</span>
                     </div>
-                    <button type="submit" className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">
+                    <button type="submit" className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 w-full sm:w-auto mt-2 sm:mt-0">
                       Add
                     </button>
                   </form>
@@ -308,7 +308,7 @@ export default function GradebookModal() {
                 <select
                   value={selectedExamId}
                   onChange={(e) => setSelectedExamId(e.target.value)}
-                  className="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
+                  className="flex-1 rounded-md border border-gray-300 px-3 py-2 text-base sm:text-sm outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
                 >
                   <option value="">-- Select Exam --</option>
                   {exams.map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
@@ -316,7 +316,7 @@ export default function GradebookModal() {
                 <select
                   value={selectedSubjectId}
                   onChange={(e) => setSelectedSubjectId(e.target.value)}
-                  className="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
+                  className="flex-1 rounded-md border border-gray-300 px-3 py-2 text-base sm:text-sm outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
                 >
                   <option value="">-- Select Subject --</option>
                   {subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
@@ -372,7 +372,7 @@ export default function GradebookModal() {
                             placeholder="Score"
                             value={score}
                             onChange={(e) => setExamGrade(selectedExamId, selectedSubjectId, student.id, e.target.value)}
-                            className="w-24 rounded-md border border-gray-300 px-3 py-1.5 text-sm outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
+                            className="w-24 rounded-md border border-gray-300 px-3 py-1.5 text-base sm:text-sm outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
                           />
                           <span className="text-sm font-medium text-gray-500 w-12">/ {maxMarks}</span>
                         </div>
@@ -391,7 +391,7 @@ export default function GradebookModal() {
                 <select
                   value={selectedStudentId}
                   onChange={(e) => setSelectedStudentId(e.target.value)}
-                  className="w-full max-w-md rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
+                  className="w-full max-w-md rounded-md border border-gray-300 px-3 py-2 text-base sm:text-sm outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
                 >
                   <option value="">-- Select a Student to view Report Card --</option>
                   {students.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}

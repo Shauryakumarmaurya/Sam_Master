@@ -14,6 +14,13 @@ export const metadata = {
   keywords: ["attendance", "teacher", "school", "students", "calendar"],
 };
 
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
+
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${inter.variable} antialiased`} style={{ background: '#f9fafb' }}>
