@@ -44,12 +44,13 @@ export default function GradebookModal() {
         if (!reportWrapperRef.current || !reportCardRef.current) return;
         const parentWidth = reportWrapperRef.current.parentElement.clientWidth;
         if (parentWidth < 800) {
-          const newScale = (parentWidth - 32) / 800; // 32px for padding
+          // If parent is smaller than 800, scale it down to fit exactly
+          const newScale = parentWidth / 800;
           setReportScale(newScale);
           reportWrapperRef.current.style.height = `${reportCardRef.current.scrollHeight * newScale}px`;
         } else {
           setReportScale(1);
-          reportWrapperRef.current.style.height = 'auto';
+          reportWrapperRef.current.style.height = `${reportCardRef.current.scrollHeight}px`;
         }
       };
       
@@ -394,10 +395,10 @@ export default function GradebookModal() {
               </div>
 
               {selectedStudentId && (
-                <div ref={reportWrapperRef} className="w-full relative flex justify-center mb-6">
+                <div ref={reportWrapperRef} className="w-full relative mb-6">
                   <div 
                     ref={reportCardRef} 
-                    className="print-section absolute top-0 rounded-2xl border border-gray-200 bg-white p-12 shadow-2xl min-w-[800px] w-[800px]"
+                    className="print-section absolute top-0 left-[50%] -ml-[400px] rounded-2xl border border-gray-200 bg-white p-12 shadow-2xl w-[800px]"
                     style={{
                       transform: `scale(${reportScale})`,
                       transformOrigin: 'top center'
