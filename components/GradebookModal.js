@@ -197,22 +197,26 @@ export default function GradebookModal() {
         </div>
 
         {/* Tabs */}
-        <div className="border-b border-gray-200 bg-gray-50 px-6 overflow-x-auto custom-scrollbar">
-          <nav className="-mb-px flex space-x-4 sm:space-x-8">
-            {['setup', 'grading', 'report', 'rankings'].map((tab) => (
+        <div className="border-b border-gray-200 bg-gray-50 px-3 sm:px-6 py-2">
+          <nav className="grid grid-cols-4 gap-1 sm:flex sm:space-x-6 sm:gap-0">
+            {[
+              { key: 'setup', icon: '⚙️', short: 'Setup', full: 'Setup & Config' },
+              { key: 'grading', icon: '✏️', short: 'Grades', full: 'Grading Entry' },
+              { key: 'report', icon: '📄', short: 'Reports', full: 'Report Cards' },
+              { key: 'rankings', icon: '🏆', short: 'Ranks', full: 'Class Rankings' },
+            ].map((tab) => (
               <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium transition-colors ${
-                  activeTab === tab
-                    ? 'border-purple-500 text-purple-600'
-                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className={`flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-2 rounded-lg sm:rounded-none py-2 sm:py-3 px-1 sm:px-1 text-[11px] sm:text-sm font-medium transition-colors sm:border-b-2 sm:whitespace-nowrap ${
+                  activeTab === tab.key
+                    ? 'bg-purple-100 text-purple-700 sm:bg-transparent sm:border-purple-500 sm:text-purple-600'
+                    : 'text-gray-500 sm:border-transparent hover:text-gray-700 hover:bg-gray-100 sm:hover:bg-transparent sm:hover:border-gray-300'
                 }`}
               >
-                {tab === 'setup' && 'Setup & Configuration'}
-                {tab === 'grading' && 'Grading Entry'}
-                {tab === 'report' && 'Report Cards'}
-                {tab === 'rankings' && 'Class Rankings'}
+                <span className="text-base sm:hidden">{tab.icon}</span>
+                <span className="sm:hidden">{tab.short}</span>
+                <span className="hidden sm:inline">{tab.full}</span>
               </button>
             ))}
           </nav>
