@@ -19,7 +19,7 @@ export default function Home() {
       <div className="flex min-h-screen flex-col" style={{ background: '#f9fafb' }}>
         <Header />
 
-        <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-8 sm:px-6 lg:px-8">
+        <main className="mx-auto w-full max-w-4xl flex-1 px-3 sm:px-6 lg:px-8 py-6 sm:py-8">
           <div className="space-y-6">
             <Calendar />
             <div className="grid gap-6 md:grid-cols-2">

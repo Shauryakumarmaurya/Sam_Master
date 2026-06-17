@@ -89,7 +89,7 @@ export default function AttendanceSheet() {
       </div>
 
       {/* Action Button */}
-      <div className="mt-2 flex gap-3">
+      <div className="mt-4 sm:mt-2 flex flex-col sm:flex-row gap-3">
         <button
           id="btn-open-attendance"
           onClick={() => setShowAttendance(true)}

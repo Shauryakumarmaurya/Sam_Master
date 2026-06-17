@@ -7,7 +7,7 @@ export default function MarksCard() {
   const { setShowGradebook, subjects, exams } = useApp();
   
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm flex flex-col justify-between">
+    <div className="rounded-xl border border-gray-200 bg-white p-4 sm:p-5 shadow-sm flex flex-col h-full justify-between">
       <div className="mb-4">
         <h2 className="text-sm font-bold text-gray-800">Academic Gradebook</h2>
         <p className="text-xs text-gray-500">Manage subjects and exams</p>

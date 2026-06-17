@@ -166,8 +166,8 @@ export default function GradebookModal() {
         </div>
 
         {/* Tabs */}
-        <div className="border-b border-gray-200 bg-gray-50 px-6">
-          <nav className="-mb-px flex space-x-8">
+        <div className="border-b border-gray-200 bg-gray-50 px-6 overflow-x-auto custom-scrollbar">
+          <nav className="-mb-px flex space-x-4 sm:space-x-8">
             {['setup', 'grading', 'report', 'rankings'].map((tab) => (
               <button
                 key={tab}
@@ -269,7 +269,7 @@ export default function GradebookModal() {
           {/* TAB: GRADING */}
           {activeTab === 'grading' && (
             <div className="mx-auto max-w-4xl rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-              <div className="mb-6 flex gap-4">
+              <div className="mb-6 flex flex-col sm:flex-row gap-4">
                 <select
                   value={selectedExamId}
                   onChange={(e) => setSelectedExamId(e.target.value)}
@@ -364,7 +364,8 @@ export default function GradebookModal() {
               </div>
 
               {selectedStudentId && (
-                <div ref={reportCardRef} className="print-section relative rounded-2xl border border-gray-200 bg-white p-12 shadow-2xl mx-auto max-w-[210mm]">
+                <div className="overflow-x-auto custom-scrollbar w-full pb-6">
+                  <div ref={reportCardRef} className="print-section relative rounded-2xl border border-gray-200 bg-white p-6 sm:p-12 shadow-2xl mx-auto min-w-[800px] w-[210mm]">
                   {/* Action Bar (Not Printed) */}
                   <div className="absolute top-6 right-6 no-print">
                     <button 
@@ -660,6 +661,7 @@ export default function GradebookModal() {
                     </>
                   )}
                 </div>
+                </div>
               )}
             </div>
           )}
@@ -672,8 +674,8 @@ export default function GradebookModal() {
                 {students.length === 0 ? (
                   <p className="text-sm text-gray-500">No students found in the roster.</p>
                 ) : (
-                  <div className="overflow-hidden rounded-lg border border-gray-200">
-                    <table className="w-full text-left text-sm text-gray-600">
+                  <div className="overflow-x-auto rounded-lg border border-gray-200">
+                    <table className="w-full text-left text-sm text-gray-600 min-w-[600px]">
                       <thead className="bg-gray-50 text-gray-700">
                         <tr>
                           <th className="px-4 py-3 font-semibold">Rank</th>

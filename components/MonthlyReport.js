@@ -108,7 +108,7 @@ export default function MonthlyReport() {
           </div>
 
           {/* Summary row */}
-          <div className="mb-5 grid grid-cols-4 gap-3">
+          <div className="mb-5 grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 text-center">
               <p className="text-xl font-semibold text-gray-900">{totalDays}</p>
               <p className="mt-0.5 text-[10px] font-medium uppercase tracking-wide text-gray-400">Calendar Days</p>
@@ -133,8 +133,8 @@ export default function MonthlyReport() {
               No students in the roster
             </p>
           ) : (
-            <div className="overflow-hidden rounded-lg border border-gray-200">
-              <table className="w-full text-sm">
+            <div className="overflow-x-auto rounded-lg border border-gray-200">
+              <table className="w-full text-sm min-w-[500px]">
                 <thead>
                   <tr className="border-b border-gray-200 bg-gray-50">
                     <th className="px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-gray-400">#</th>

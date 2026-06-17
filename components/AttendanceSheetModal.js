@@ -64,8 +64,8 @@ export default function AttendanceSheetModal() {
               <p className="text-sm text-gray-500">No students added to the roster yet.</p>
             </div>
           ) : (
-            <div className="rounded-lg border border-gray-200 overflow-hidden">
-              <table className="w-full text-sm">
+            <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white">
+              <table className="w-full text-sm min-w-[500px]">
                 <tbody>
                   {students.map((student, index) => {
                     const status = dateAttendance[student.id] || null;
