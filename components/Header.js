@@ -2,6 +2,7 @@
 
 import { useApp } from './AppProvider';
 import { useState, useEffect } from 'react';
+import InstallPWA from './InstallPWA';
 
 function LiveClock() {
   const [time, setTime] = useState(new Date());
@@ -54,7 +55,8 @@ export default function Header() {
           </div>
         </div>
 
-          <div className="flex w-full sm:w-auto items-center justify-between gap-2 sm:gap-3">
+          <div className="flex w-full sm:w-auto items-center justify-between gap-2 sm:gap-3 flex-wrap sm:flex-nowrap">
+            <InstallPWA />
             <button
               id="btn-student-roster"
               onClick={() => setShowRoster(true)}
