@@ -699,7 +699,7 @@ export default function GradebookModal() {
                           <span className="mt-3 text-xs font-bold uppercase tracking-wider text-gray-500">Class Teacher</span>
                           
                           {/* Hover Overlay */}
-                          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity no-print">
+                          <div className="absolute inset-0 flex items-center justify-center opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity no-print">
                             <span className="bg-indigo-600 text-white text-[10px] font-bold px-3 py-1.5 rounded-full shadow-lg">Upload Signature</span>
                           </div>
                           {/* Hidden File Input */}
@@ -713,7 +713,7 @@ export default function GradebookModal() {
                           <span className="mt-3 text-xs font-bold uppercase tracking-wider text-gray-500">Principal</span>
                           
                           {/* Hover Overlay */}
-                          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity no-print">
+                          <div className="absolute inset-0 flex items-center justify-center opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity no-print">
                             <span className="bg-indigo-600 text-white text-[10px] font-bold px-3 py-1.5 rounded-full shadow-lg">Upload Signature</span>
                           </div>
                           {/* Hidden File Input */}

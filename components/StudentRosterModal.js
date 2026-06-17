@@ -47,8 +47,8 @@ export default function StudentRosterModal() {
       <div className="relative max-h-[85vh] w-full max-w-lg overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
-          <div className="flex items-center gap-3">
-            <h2 className="text-base font-semibold text-gray-900">Student Roster</h2>
+          <div className="flex flex-col items-start gap-0.5">
+            <h2 className="text-base font-semibold text-gray-900 leading-tight">Student Roster</h2>
             <p className="text-xs text-gray-500">Manage your class list ({students.length} students)</p>
           </div>
           <button
@@ -122,7 +122,7 @@ export default function StudentRosterModal() {
                       <td className="py-2.5 pr-4 w-10 text-right">
                         <button
                           onClick={() => removeStudent(student.id)}
-                          className="flex h-7 w-7 items-center justify-center rounded text-gray-400 opacity-0 hover:bg-red-50 hover:text-red-600 group-hover:opacity-100 transition-all ml-auto"
+                          className="flex h-7 w-7 items-center justify-center rounded text-gray-400 opacity-100 sm:opacity-0 hover:bg-red-50 hover:text-red-600 sm:group-hover:opacity-100 transition-all ml-auto"
                           aria-label={`Remove ${student.name}`}
                         >
                           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
