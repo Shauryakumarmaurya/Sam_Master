@@ -1,24 +1,29 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 export function useModalHistory(closeModal) {
-  useEffect(() => {
-    // When modal opens, push a dummy state to history
-    window.history.pushState({ modalOpen: true }, '');
+  const hashRef = useRef(`#modal-${Math.random().toString(36).substr(2, 9)}`);
+  const isClosingRef = useRef(false);
 
-    const handlePopState = (e) => {
-      // User pressed the system Back button or swiped back
-      closeModal();
+  useEffect(() => {
+    // Use hash to add a history entry safely in Next.js without breaking internal router state
+    window.location.hash = hashRef.current;
+
+    const handleHashChange = () => {
+      if (window.location.hash !== hashRef.current && !isClosingRef.current) {
+        isClosingRef.current = true;
+        closeModal();
+      }
     };
 
-    window.addEventListener('popstate', handlePopState);
+    window.addEventListener('hashchange', handleHashChange);
 
     return () => {
-      window.removeEventListener('popstate', handlePopState);
-      // If user clicked 'X' to close, the history state is still there.
-      // We must clean it up so the next Back button press doesn't do nothing.
-      if (window.history.state && window.history.state.modalOpen) {
+      window.removeEventListener('hashchange', handleHashChange);
+      // Clean up history if closed manually via 'X' button
+      if (!isClosingRef.current && window.location.hash === hashRef.current) {
+        isClosingRef.current = true;
         window.history.back();
       }
     };
