@@ -15,7 +15,9 @@ export default function SyncImportHelper() {
   }, [setExamGrade, exams, subjects, students]);
 
   useEffect(() => {
-    const interval = setInterval(async () => {
+    let isInitialLoad = true;
+
+    const fetchSyncs = async () => {
       try {
         const res = await fetch('/api/sync');
         if (!res.ok) return;
@@ -37,17 +39,20 @@ export default function SyncImportHelper() {
             importedSyncs.push(submission.id);
             newImports = true;
             
-            const subjectName = subjects.find(s => s.id === submission.subjectId)?.name || 'a Subject';
-            
-            setNotifications(prev => [...prev, {
-              id: submission.id,
-              message: `Marks submitted by the ${subjectName} teacher!`
-            }]);
-            
-            // Auto dismiss after 4 seconds
-            setTimeout(() => {
-              setNotifications(prev => prev.filter(x => x.id !== submission.id));
-            }, 4000);
+            // Only show toast if it's NOT the initial bulk historical load
+            if (!isInitialLoad) {
+              const subjectName = subjects.find(s => s.id === submission.subjectId)?.name || 'a Subject';
+              
+              setNotifications(prev => [...prev, {
+                id: submission.id,
+                message: `Marks submitted by the ${subjectName} teacher!`
+              }]);
+              
+              // Auto dismiss after 4 seconds
+              setTimeout(() => {
+                setNotifications(prev => prev.filter(x => x.id !== submission.id));
+              }, 4000);
+            }
           }
         });
 
@@ -56,8 +61,16 @@ export default function SyncImportHelper() {
         }
       } catch(e) {
         // ignore errors if api fails
+      } finally {
+        isInitialLoad = false;
       }
-    }, 3000); // Poll every 3 seconds
+    };
+
+    // Run immediately on mount
+    fetchSyncs();
+
+    // Then poll every 3 seconds
+    const interval = setInterval(fetchSyncs, 3000);
 
     return () => clearInterval(interval);
   }, []);
