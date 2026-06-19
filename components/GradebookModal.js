@@ -321,6 +321,9 @@ export default function GradebookModal() {
     setIsExportingRankings(true);
 
     try {
+      // Wait for React to render the beautiful export header and hide UI elements
+      await new Promise(resolve => setTimeout(resolve, 150));
+
       const element = rankingsRef.current;
       const targetWidth = Math.max(element.scrollWidth, 794);
       const targetHeight = element.scrollHeight;
@@ -915,8 +918,21 @@ export default function GradebookModal() {
             <div className="mx-auto max-w-4xl space-y-6">
               <div ref={rankingsRef} className="rounded-xl border border-gray-200 bg-white p-4 sm:p-6 shadow-sm">
                 
-                {/* Highlighted Mobile-Friendly Filter Bar */}
-                <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-6 gap-4 bg-purple-50/80 p-4 rounded-xl border-2 border-purple-100 shadow-inner">
+                {/* PDF EXPORT HEADER - ONLY VISIBLE DURING EXPORT */}
+                {isExportingRankings && (
+                  <div className="mb-8 text-center border-b-2 border-indigo-100 pb-6 mt-4">
+                    <h1 className="text-3xl font-black text-indigo-900 uppercase tracking-widest mb-2">Academic Excellence Report</h1>
+                    <h2 className="text-xl font-bold text-gray-700 mb-4">Official Class Rankings</h2>
+                    <div className="flex justify-center gap-6 text-sm font-semibold text-gray-500">
+                      <span className="bg-gray-100 px-3 py-1 rounded-md">Filter: {rankingsExamFilter === 'all' ? 'Overall (All Exams)' : exams.find(e => e.id === rankingsExamFilter)?.name}</span>
+                      <span className="bg-gray-100 px-3 py-1 rounded-md">Date: {new Date().toLocaleDateString()}</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Highlighted Mobile-Friendly Filter Bar (HIDE DURING EXPORT) */}
+                {!isExportingRankings && (
+                  <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-6 gap-4 bg-purple-50/80 p-4 rounded-xl border-2 border-purple-100 shadow-inner">
                   <div className="flex items-center gap-2 text-purple-900">
                     <div className="bg-purple-200 p-1.5 rounded-lg">
                       <svg className="w-5 h-5 text-purple-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1012,7 +1028,7 @@ export default function GradebookModal() {
                           <th className="px-2 sm:px-4 py-2 sm:py-3 font-semibold truncate max-w-[100px] sm:max-w-none">Student</th>
                           <th className="px-2 sm:px-4 py-2 sm:py-3 font-semibold text-right">Score</th>
                           <th className="px-2 sm:px-4 py-2 sm:py-3 font-semibold text-right"><span className="hidden sm:inline">Percentage</span><span className="sm:hidden">%</span></th>
-                          <th className="px-2 sm:px-4 py-2 sm:py-3 font-semibold text-right w-10 sm:w-auto"></th>
+                          {!isExportingRankings && <th className="px-2 sm:px-4 py-2 sm:py-3 font-semibold text-right w-10 sm:w-auto"></th>}
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100">
@@ -1073,23 +1089,44 @@ export default function GradebookModal() {
                                     {Math.round(student.percent)}%
                                   </span>
                                 </td>
-                                <td className="px-2 sm:px-4 py-2 sm:py-3 text-right">
-                                  <button
-                                    onClick={() => handleQuickDownload(student.id)}
-                                    title="Download Report Card"
-                                    className="inline-flex items-center justify-center h-7 w-7 sm:h-8 sm:w-8 rounded-full bg-indigo-50 text-indigo-600 hover:bg-indigo-100 hover:scale-105 active:scale-95 transition-all shadow-sm"
-                                  >
-                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                    </svg>
-                                  </button>
-                                </td>
+                                {!isExportingRankings && (
+                                  <td className="px-2 sm:px-4 py-2 sm:py-3 text-right">
+                                    <button
+                                      onClick={() => handleQuickDownload(student.id)}
+                                      title="Download Report Card"
+                                      className="inline-flex items-center justify-center h-7 w-7 sm:h-8 sm:w-8 rounded-full bg-indigo-50 text-indigo-600 hover:bg-indigo-100 hover:scale-105 active:scale-95 transition-all shadow-sm"
+                                    >
+                                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                      </svg>
+                                    </button>
+                                  </td>
+                                )}
                               </tr>
                             );
                           });
                         })()}
                       </tbody>
                     </table>
+                  </div>
+                )}
+                
+                {/* Official Signatures Header - ONLY VISIBLE DURING EXPORT */}
+                {isExportingRankings && (
+                  <div className="mt-16 pt-8 flex items-end justify-between px-12 pb-4">
+                    <div className="flex flex-col items-center">
+                      <div className="w-48 border-b-2 border-gray-800 flex justify-center items-end h-16">
+                        {classTeacherSignature && <img src={classTeacherSignature} alt="Class Teacher" className="max-h-16 object-contain mb-1" />}
+                      </div>
+                      <span className="mt-3 text-xs font-bold uppercase tracking-wider text-gray-500">Class Teacher</span>
+                    </div>
+                    
+                    <div className="flex flex-col items-center">
+                      <div className="w-48 border-b-2 border-gray-800 flex justify-center items-end h-16">
+                        {principalSignature && <img src={principalSignature} alt="Principal" className="max-h-16 object-contain mb-1" />}
+                      </div>
+                      <span className="mt-3 text-xs font-bold uppercase tracking-wider text-gray-500">Principal</span>
+                    </div>
                   </div>
                 )}
               </div>
