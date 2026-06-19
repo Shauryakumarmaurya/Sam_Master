@@ -1100,14 +1100,14 @@ export default function GradebookModal() {
                 {students.length === 0 ? (
                   <p className="text-sm text-gray-500">No students found in the roster.</p>
                 ) : (
-                  <div className="overflow-hidden rounded-lg border border-gray-200">
+                  <div className="overflow-hidden rounded-lg border border-gray-200 max-w-2xl mx-auto">
                     <table className="w-full text-left text-sm text-gray-600">
                       <thead className="bg-gray-50 text-gray-700">
                         <tr>
-                          <th className="px-2 sm:px-3 py-2 font-semibold w-14">Rank</th>
-                          <th className="px-2 sm:px-3 py-2 font-semibold">Student</th>
-                          <th className="px-2 sm:px-3 py-2 font-semibold text-right">Score</th>
-                          <th className="px-2 sm:px-3 py-2 font-semibold text-right">Percentage</th>
+                          <th className="pl-3 pr-1 py-2 font-semibold w-14">Rank</th>
+                          <th className="px-2 py-2 font-semibold">Student</th>
+                          <th className="px-2 py-2 font-semibold text-right w-24">Score</th>
+                          <th className="pl-2 pr-3 py-2 font-semibold text-right w-24">Percentage</th>
                           {!isExportingRankings && <th className="px-2 py-2 font-semibold text-right w-10"></th>}
                         </tr>
                       </thead>
@@ -1140,7 +1140,7 @@ export default function GradebookModal() {
                             
                             return (
                               <tr key={student.id} className={`hover:bg-gray-50 ${currentRank === 1 && student.grandScore > 0 ? 'bg-amber-50/30' : ''}`}>
-                                <td className="px-2 sm:px-3 py-1.5 font-medium">
+                                <td className="pl-3 pr-1 py-1.5 font-medium">
                                   {student.grandScore === 0 ? (
                                     <span className="text-gray-400">-</span>
                                   ) : isTop3 ? (
@@ -1155,13 +1155,13 @@ export default function GradebookModal() {
                                     <span className="text-gray-600 text-sm">#{currentRank}</span>
                                   )}
                                 </td>
-                                <td className={`px-2 sm:px-3 py-1.5 text-base ${isTop3 ? 'font-bold text-gray-900' : 'font-semibold text-gray-800'}`}>
+                                <td className={`px-2 py-1.5 text-base ${isTop3 ? 'font-bold text-gray-900' : 'font-semibold text-gray-800'}`}>
                                   {student.name}
                                 </td>
-                                <td className="px-2 sm:px-3 py-1.5 text-right font-medium text-gray-900 text-sm">
+                                <td className="px-2 py-1.5 text-right font-medium text-gray-900 text-sm">
                                   {student.grandScore} <span className="text-xs text-gray-400">/ {student.grandMax}</span>
                                 </td>
-                                <td className="px-2 sm:px-3 py-1.5 text-right">
+                                <td className="pl-2 pr-3 py-1.5 text-right">
                                   <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-bold ring-1 ring-inset ${
                                     student.percent >= 40 ? 'bg-green-50 text-green-700 ring-green-600/20' : 
                                     student.percent > 0 ? 'bg-red-50 text-red-700 ring-red-600/20' : 'bg-gray-50 text-gray-500 ring-gray-200'
