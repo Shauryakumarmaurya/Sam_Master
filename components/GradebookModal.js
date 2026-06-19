@@ -1015,6 +1015,7 @@ export default function GradebookModal() {
                       </button>
                     </div>
                   </div>
+                </div>
                 )}
                 
                 {students.length === 0 ? (
