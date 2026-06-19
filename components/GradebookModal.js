@@ -1012,10 +1012,10 @@ export default function GradebookModal() {
                           Download All (.zip)
                         </>
                       )}
-                    </button>
+                      </button>
                     </div>
                   </div>
-                </div>
+                )}
                 
                 {students.length === 0 ? (
                   <p className="text-sm text-gray-500">No students found in the roster.</p>
