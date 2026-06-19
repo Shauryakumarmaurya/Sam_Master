@@ -361,30 +361,40 @@ export default function GradebookModal() {
       const pageHeight = pdf.internal.pageSize.getHeight();
       const margin = 8; // mm margin on each side
       const usableWidth = pageWidth - (margin * 2);
+      const usablePageHeight = pageHeight - (margin * 2);
       
       const imgProps = pdf.getImageProperties(imgData);
       // Scale image to fill the usable width of A4
       const scaledHeight = (imgProps.height * usableWidth) / imgProps.width;
       
       // If content fits on one page, just place it
-      if (scaledHeight <= pageHeight - (margin * 2)) {
+      if (scaledHeight <= usablePageHeight) {
         pdf.addImage(imgData, 'PNG', margin, margin, usableWidth, scaledHeight);
       } else {
-        // Multi-page: slice the image across pages
-        const totalPages = Math.ceil(scaledHeight / (pageHeight - (margin * 2)));
-        const usablePageHeight = pageHeight - (margin * 2);
+        // Multi-page: use a canvas to slice the image into page-sized chunks
+        const img = new Image();
+        img.src = imgData;
+        await new Promise(resolve => { img.onload = resolve; });
+        
+        const imgWidth = img.width;
+        const imgHeight = img.height;
+        // How many pixels of the source image fit on one page
+        const pageImgHeight = Math.floor(imgHeight * (usablePageHeight / scaledHeight));
+        const totalPages = Math.ceil(imgHeight / pageImgHeight);
         
         for (let page = 0; page < totalPages; page++) {
           if (page > 0) pdf.addPage();
           
-          // We place the full image but offset it upward for each page
-          const yOffset = margin - (page * usablePageHeight);
+          const canvas = document.createElement('canvas');
+          canvas.width = imgWidth;
+          const sliceHeight = Math.min(pageImgHeight, imgHeight - (page * pageImgHeight));
+          canvas.height = sliceHeight;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, page * pageImgHeight, imgWidth, sliceHeight, 0, 0, imgWidth, sliceHeight);
           
-          // Clip to page bounds using a rectangle
-          pdf.saveGraphicsState();
-          pdf.rect(margin, margin, usableWidth, usablePageHeight, 'clip');
-          pdf.addImage(imgData, 'PNG', margin, yOffset, usableWidth, scaledHeight);
-          pdf.restoreGraphicsState();
+          const sliceData = canvas.toDataURL('image/png');
+          const sliceScaledHeight = (sliceHeight * usableWidth) / imgWidth;
+          pdf.addImage(sliceData, 'PNG', margin, margin, usableWidth, sliceScaledHeight);
         }
       }
       
@@ -592,6 +602,7 @@ export default function GradebookModal() {
                   No students in the roster.
                 </div>
               ) : (
+                <>
                 <div className="divide-y divide-gray-100">
                   {students.map(student => {
                     const score = examGrades[selectedExamId]?.[selectedSubjectId]?.[student.id] || '';
@@ -652,6 +663,7 @@ export default function GradebookModal() {
                     <p className="text-sm font-semibold text-green-600 animate-pulse">✅ All grades have been saved!</p>
                   )}
                 </div>
+                </>
               )}
             </div>
           )}
