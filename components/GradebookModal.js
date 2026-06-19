@@ -223,8 +223,10 @@ export default function GradebookModal() {
         const blob = pdf.output('blob');
         const file = new File([blob], filename, { type: 'application/pdf' });
         
-        // Use native iOS/Android Share Sheet to prevent WebKitBlobResource history corruption
-        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        
+        // Use native iOS/Android Share Sheet to prevent WebKitBlobResource history corruption on mobile
+        if (isMobile && navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
           await navigator.share({
             files: [file],
             title: filename,
@@ -311,8 +313,9 @@ export default function GradebookModal() {
 
       const zipBlob = await zip.generateAsync({ type: 'blob' });
       const zipFile = new File([zipBlob], 'Class_Report_Cards.zip', { type: 'application/zip' });
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
       
-      if (navigator.share && navigator.canShare && navigator.canShare({ files: [zipFile] })) {
+      if (isMobile && navigator.share && navigator.canShare && navigator.canShare({ files: [zipFile] })) {
         await navigator.share({ files: [zipFile], title: 'Class Report Cards' });
       } else {
         const url = URL.createObjectURL(zipBlob);
@@ -371,7 +374,8 @@ export default function GradebookModal() {
       try {
         const blob = pdf.output('blob');
         const file = new File([blob], filename, { type: 'application/pdf' });
-        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        if (isMobile && navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
           await navigator.share({ files: [file], title: filename });
         } else {
           pdf.save(filename);
