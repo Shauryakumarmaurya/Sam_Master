@@ -325,6 +325,12 @@ export default function GradebookModal() {
     } catch (error) {
       console.error('Bulk download error:', error);
       alert('Failed to generate bulk ZIP. Please try again.');
+    } finally {
+      setIsBulkDownloading(false);
+      setBulkProgress(0);
+    }
+  };
+
   const exportRankingsToPDF = async () => {
     if (!rankingsRef.current || students.length === 0) return;
     setIsExportingRankings(true);
