@@ -11,11 +11,13 @@ import MarksCard from '@/components/MarksCard';
 import MarksSheetModal from '@/components/MarksSheetModal';
 import GradebookModal from '@/components/GradebookModal';
 import SyncImportHelper from '@/components/SyncImportHelper';
+import SplashScreen from '@/components/SplashScreen';
 import { Suspense } from 'react';
 
 export default function Home() {
   return (
     <AppProvider>
+      <SplashScreen />
       <div className="flex min-h-screen flex-col" style={{ background: '#f9fafb' }}>
         <Header />
 

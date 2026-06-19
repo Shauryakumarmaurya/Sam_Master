@@ -84,3 +84,21 @@ input[type="number"] {
     display: none !important;
   }
 }
+
+/* Splash Screen Animations */
+@keyframes splashSparkle {
+  0% { transform: translateY(0) scale(1); opacity: 0; }
+  50% { transform: translateY(-20px) scale(1.5); opacity: 1; }
+  100% { transform: translateY(-40px) scale(0.5); opacity: 0; }
+}
+
+@keyframes splashLogoGlow {
+  0% { box-shadow: 0 0 40px rgba(255,255,255,0.3), 0 0 80px rgba(16,185,129,0.4); }
+  50% { box-shadow: 0 0 60px rgba(255,255,255,0.5), 0 0 120px rgba(16,185,129,0.6); }
+  100% { box-shadow: 0 0 40px rgba(255,255,255,0.3), 0 0 80px rgba(16,185,129,0.4); }
+}
+
+@keyframes splashTextFadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
