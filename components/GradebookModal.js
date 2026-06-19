@@ -998,6 +998,7 @@ export default function GradebookModal() {
                         </>
                       )}
                     </button>
+                    </div>
                   </div>
                 </div>
                 
