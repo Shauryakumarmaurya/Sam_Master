@@ -321,8 +321,8 @@ export default function GradebookModal() {
     setIsExportingRankings(true);
 
     try {
-      // Wait for React to render the beautiful export header and hide UI elements
-      await new Promise(resolve => setTimeout(resolve, 150));
+      // Wait for React to render the export header and hide UI elements
+      await new Promise(resolve => setTimeout(resolve, 200));
 
       const element = rankingsRef.current;
       const targetWidth = Math.max(element.scrollWidth, 794);
@@ -338,28 +338,43 @@ export default function GradebookModal() {
         filter: (node) => !(node.classList && node.classList.contains('no-print'))
       });
       
-      const pdf = new jsPDF(targetWidth > targetHeight ? 'l' : 'p', 'mm', 'a4');
+      // Always portrait A4
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const margin = 8; // mm margin on each side
+      const usableWidth = pageWidth - (margin * 2);
+      
       const imgProps = pdf.getImageProperties(imgData);
-      let pdfWidth = pdf.internal.pageSize.getWidth();
-      let pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      // Scale image to fill the usable width of A4
+      const scaledHeight = (imgProps.height * usableWidth) / imgProps.width;
       
-      const maxPdfHeight = pdf.internal.pageSize.getHeight();
-      if (pdfHeight > maxPdfHeight) {
-        const ratio = maxPdfHeight / pdfHeight;
-        pdfHeight = maxPdfHeight;
-        pdfWidth = pdfWidth * ratio;
+      // If content fits on one page, just place it
+      if (scaledHeight <= pageHeight - (margin * 2)) {
+        pdf.addImage(imgData, 'PNG', margin, margin, usableWidth, scaledHeight);
+      } else {
+        // Multi-page: slice the image across pages
+        const totalPages = Math.ceil(scaledHeight / (pageHeight - (margin * 2)));
+        const usablePageHeight = pageHeight - (margin * 2);
+        
+        for (let page = 0; page < totalPages; page++) {
+          if (page > 0) pdf.addPage();
+          
+          // We place the full image but offset it upward for each page
+          const yOffset = margin - (page * usablePageHeight);
+          
+          // Clip to page bounds using a rectangle
+          pdf.saveGraphicsState();
+          pdf.rect(margin, margin, usableWidth, usablePageHeight, 'clip');
+          pdf.addImage(imgData, 'PNG', margin, yOffset, usableWidth, scaledHeight);
+          pdf.restoreGraphicsState();
+        }
       }
-      
-      const xOffset = (pdf.internal.pageSize.getWidth() - pdfWidth) / 2;
-      pdf.addImage(imgData, 'PNG', xOffset, 0, pdfWidth, pdfHeight);
       
       const filterName = rankingsExamFilter === 'all' ? 'Overall' : exams.find(e => e.id === rankingsExamFilter)?.name || 'Filtered';
       const filename = `Class_Rankings_${filterName.replace(/[^a-z0-9]/gi, '_')}.pdf`;
       
       try {
-        const blob = pdf.output('blob');
-        
-        // Universally force automatic download instead of using share sheets
         pdf.save(filename);
       } catch (err) {
         console.error('Save error:', err);
