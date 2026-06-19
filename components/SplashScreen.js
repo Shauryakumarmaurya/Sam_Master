@@ -98,25 +98,54 @@ export default function SplashScreen() {
           boxShadow: isOpening ? '0 0 40px #4ade80' : 'none',
         }} />
 
-        {/* The Door Panel */}
+        {/* The Left Door Panel */}
         <div style={{
           position: 'absolute',
           top: '3px',
           bottom: '3px',
           left: '3px',
-          right: '3px',
+          width: 'calc(50% - 3px)',
           background: '#0a0a0a',
           border: '1px solid rgba(255,255,255,0.1)',
-          borderRadius: '3px',
+          borderRight: '0.5px solid rgba(255,255,255,0.1)',
+          borderRadius: '3px 0 0 3px',
           transformOrigin: 'left center',
           transform: isOpening ? 'rotateY(-105deg)' : 'rotateY(0deg)',
           transition: 'transform 2s cubic-bezier(0.4, 0, 0.2, 1)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'flex-end',
-          paddingRight: '6px',
+          paddingRight: '4px',
         }}>
-          {/* Door Handle */}
+          {/* Left Door Handle */}
+          <div style={{
+            width: '3px',
+            height: '14px',
+            background: 'rgba(255,255,255,0.5)',
+            borderRadius: '1.5px',
+          }} />
+        </div>
+
+        {/* The Right Door Panel */}
+        <div style={{
+          position: 'absolute',
+          top: '3px',
+          bottom: '3px',
+          right: '3px',
+          width: 'calc(50% - 3px)',
+          background: '#0a0a0a',
+          border: '1px solid rgba(255,255,255,0.1)',
+          borderLeft: '0.5px solid rgba(255,255,255,0.1)',
+          borderRadius: '0 3px 3px 0',
+          transformOrigin: 'right center',
+          transform: isOpening ? 'rotateY(105deg)' : 'rotateY(0deg)',
+          transition: 'transform 2s cubic-bezier(0.4, 0, 0.2, 1)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'flex-start',
+          paddingLeft: '4px',
+        }}>
+          {/* Right Door Handle */}
           <div style={{
             width: '3px',
             height: '14px',
