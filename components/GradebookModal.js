@@ -221,25 +221,12 @@ export default function GradebookModal() {
       
       try {
         const blob = pdf.output('blob');
-        const file = new File([blob], filename, { type: 'application/pdf' });
         
-        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-        
-        // Use native iOS/Android Share Sheet to prevent WebKitBlobResource history corruption on mobile
-        if (isMobile && navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-          await navigator.share({
-            files: [file],
-            title: filename,
-          });
-        } else {
-          pdf.save(filename);
-        }
+        // Universally force automatic download instead of using share sheets
+        pdf.save(filename);
       } catch (err) {
-        console.error('Share/Save error:', err);
-        if (err.name !== 'AbortError') {
-          // Fallback if sharing fails for some reason
-          pdf.save(filename);
-        }
+        console.error('Save error:', err);
+        pdf.save(filename);
       }
     } catch (error) {
       console.error('Failed to generate PDF', error);
@@ -312,19 +299,14 @@ export default function GradebookModal() {
       }
 
       const zipBlob = await zip.generateAsync({ type: 'blob' });
-      const zipFile = new File([zipBlob], 'Class_Report_Cards.zip', { type: 'application/zip' });
-      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
       
-      if (isMobile && navigator.share && navigator.canShare && navigator.canShare({ files: [zipFile] })) {
-        await navigator.share({ files: [zipFile], title: 'Class Report Cards' });
-      } else {
-        const url = URL.createObjectURL(zipBlob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'Class_Report_Cards.zip';
-        a.click();
-        URL.revokeObjectURL(url);
-      }
+      // Universally force automatic download instead of using share sheets
+      const url = URL.createObjectURL(zipBlob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'Class_Report_Cards.zip';
+      a.click();
+      URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Bulk download error:', error);
       alert('Failed to generate bulk ZIP. Please try again.');
@@ -373,16 +355,12 @@ export default function GradebookModal() {
       
       try {
         const blob = pdf.output('blob');
-        const file = new File([blob], filename, { type: 'application/pdf' });
-        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-        if (isMobile && navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-          await navigator.share({ files: [file], title: filename });
-        } else {
-          pdf.save(filename);
-        }
+        
+        // Universally force automatic download instead of using share sheets
+        pdf.save(filename);
       } catch (err) {
-        console.error('Share error:', err);
-        if (err.name !== 'AbortError') pdf.save(filename);
+        console.error('Save error:', err);
+        pdf.save(filename);
       }
     } catch (error) {
       console.error('Failed to export rankings PDF', error);
