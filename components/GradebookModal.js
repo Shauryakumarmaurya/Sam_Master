@@ -39,6 +39,7 @@ export default function GradebookModal() {
   const [isDownloading, setIsDownloading] = useState(false);
   const [shareLinkCopied, setShareLinkCopied] = useState(false);
   const [isGeneratingLink, setIsGeneratingLink] = useState(false);
+  const [rankingsExamFilter, setRankingsExamFilter] = useState('all');
   const reportCardRef = useRef(null);
   const reportWrapperRef = useRef(null);
   const [reportScale, setReportScale] = useState(1);
@@ -785,7 +786,24 @@ export default function GradebookModal() {
           {activeTab === 'rankings' && (
             <div className="mx-auto max-w-4xl space-y-6">
               <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-                <h3 className="mb-6 text-xl font-bold text-gray-900">Class Rankings</h3>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
+                  <h3 className="text-xl font-bold text-gray-900">Class Rankings</h3>
+                  <div className="flex items-center gap-2">
+                    <label htmlFor="rankingsFilter" className="text-sm font-medium text-gray-700">Filter by Exam:</label>
+                    <select
+                      id="rankingsFilter"
+                      value={rankingsExamFilter}
+                      onChange={(e) => setRankingsExamFilter(e.target.value)}
+                      className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-900 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
+                    >
+                      <option value="all">Overall (All Exams)</option>
+                      {exams.map(ex => (
+                        <option key={ex.id} value={ex.id}>{ex.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+                
                 {students.length === 0 ? (
                   <p className="text-sm text-gray-500">No students found in the roster.</p>
                 ) : (
@@ -801,10 +819,12 @@ export default function GradebookModal() {
                       </thead>
                       <tbody className="divide-y divide-gray-100">
                         {(() => {
+                          const filteredExams = rankingsExamFilter === 'all' ? exams : exams.filter(e => e.id === rankingsExamFilter);
+                          
                           const rankedStudents = students.map(student => {
                             let grandScore = 0;
                             let grandMax = 0;
-                            exams.forEach(ex => {
+                            filteredExams.forEach(ex => {
                               subjects.forEach(sub => {
                                 const score = examGrades[ex.id]?.[sub.id]?.[student.id];
                                 if (score) {
