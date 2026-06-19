@@ -166,7 +166,7 @@ export default function GradebookModal() {
     }
   };
 
-  const handleDownloadPDF = async () => {
+  const handleDownloadPDF = async (targetStudentId = selectedStudentId) => {
     if (!reportCardRef.current) return;
     setIsDownloading(true);
     try {
@@ -213,7 +213,7 @@ export default function GradebookModal() {
       const xOffset = (pdf.internal.pageSize.getWidth() - pdfWidth) / 2;
       
       pdf.addImage(imgData, 'PNG', xOffset, 0, pdfWidth, pdfHeight);
-      const filename = `${students.find(s => s.id === selectedStudentId)?.name || 'Student'}_Report_Card.pdf`;
+      const filename = `${students.find(s => s.id === targetStudentId)?.name || 'Student'}_Report_Card.pdf`;
       
       try {
         const blob = pdf.output('blob');
@@ -240,6 +240,16 @@ export default function GradebookModal() {
     } finally {
       setIsDownloading(false);
     }
+  };
+
+  const handleQuickDownload = (studentId) => {
+    setSelectedStudentId(studentId);
+    setActiveTab('report');
+    
+    // Give React a moment to render the report tab DOM node, then trigger download
+    setTimeout(() => {
+      handleDownloadPDF(studentId);
+    }, 150);
   };
 
   return (
@@ -834,6 +844,7 @@ export default function GradebookModal() {
                           <th className="px-2 sm:px-4 py-2 sm:py-3 font-semibold truncate max-w-[100px] sm:max-w-none">Student</th>
                           <th className="px-2 sm:px-4 py-2 sm:py-3 font-semibold text-right">Score</th>
                           <th className="px-2 sm:px-4 py-2 sm:py-3 font-semibold text-right"><span className="hidden sm:inline">Percentage</span><span className="sm:hidden">%</span></th>
+                          <th className="px-2 sm:px-4 py-2 sm:py-3 font-semibold text-right w-10 sm:w-auto"></th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100">
@@ -893,6 +904,17 @@ export default function GradebookModal() {
                                   }`}>
                                     {Math.round(student.percent)}%
                                   </span>
+                                </td>
+                                <td className="px-2 sm:px-4 py-2 sm:py-3 text-right">
+                                  <button
+                                    onClick={() => handleQuickDownload(student.id)}
+                                    title="Download Report Card"
+                                    className="inline-flex items-center justify-center h-7 w-7 sm:h-8 sm:w-8 rounded-full bg-indigo-50 text-indigo-600 hover:bg-indigo-100 hover:scale-105 active:scale-95 transition-all shadow-sm"
+                                  >
+                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                    </svg>
+                                  </button>
                                 </td>
                               </tr>
                             );
