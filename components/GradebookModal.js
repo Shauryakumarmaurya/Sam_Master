@@ -43,6 +43,7 @@ export default function GradebookModal() {
   const [bulkProgress, setBulkProgress] = useState(0);
   const [rankingsExamFilter, setRankingsExamFilter] = useState('all');
   const [isExportingRankings, setIsExportingRankings] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
   const reportCardRef = useRef(null);
   const reportWrapperRef = useRef(null);
   const rankingsRef = useRef(null);
@@ -615,6 +616,41 @@ export default function GradebookModal() {
                       </div>
                     );
                   })}
+                </div>
+
+                {/* Done / Save Button */}
+                <div className="mt-6 flex flex-col items-center gap-3">
+                  <button
+                    onClick={() => {
+                      setIsSaved(true);
+                      setTimeout(() => setIsSaved(false), 2500);
+                    }}
+                    disabled={isSaved}
+                    className={`w-full sm:w-auto inline-flex items-center justify-center gap-2.5 rounded-xl px-8 py-3 text-base font-bold shadow-lg transition-all duration-300 ${
+                      isSaved
+                        ? 'bg-green-500 text-white scale-105 shadow-green-200'
+                        : 'bg-purple-600 text-white hover:bg-purple-500 hover:shadow-xl hover:scale-[1.02] active:scale-95'
+                    }`}
+                  >
+                    {isSaved ? (
+                      <>
+                        <svg className="h-5 w-5 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Saved Successfully!
+                      </>
+                    ) : (
+                      <>
+                        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Done
+                      </>
+                    )}
+                  </button>
+                  {isSaved && (
+                    <p className="text-sm font-semibold text-green-600 animate-pulse">✅ All grades have been saved!</p>
+                  )}
                 </div>
               )}
             </div>
