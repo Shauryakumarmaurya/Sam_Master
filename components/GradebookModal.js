@@ -325,7 +325,20 @@ export default function GradebookModal() {
       await new Promise(resolve => setTimeout(resolve, 200));
 
       const element = rankingsRef.current;
-      const targetWidth = Math.max(element.scrollWidth, 794);
+      
+      // On mobile, the element renders at phone width (e.g. 375px).
+      // Temporarily force it to desktop width so the PDF looks full and readable.
+      const originalStyle = element.getAttribute('style') || '';
+      const forcedWidth = 794;
+      element.style.width = `${forcedWidth}px`;
+      element.style.minWidth = `${forcedWidth}px`;
+      element.style.maxWidth = `${forcedWidth}px`;
+      element.style.overflow = 'visible';
+      
+      // Let the browser reflow at the forced width
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      const targetWidth = forcedWidth;
       const targetHeight = element.scrollHeight;
 
       const imgData = await htmlToImage.toPng(element, { 
@@ -337,6 +350,9 @@ export default function GradebookModal() {
         backgroundColor: '#ffffff',
         filter: (node) => !(node.classList && node.classList.contains('no-print'))
       });
+      
+      // Restore original style immediately
+      element.setAttribute('style', originalStyle);
       
       // Always portrait A4
       const pdf = new jsPDF('p', 'mm', 'a4');
@@ -1124,25 +1140,6 @@ export default function GradebookModal() {
                         })()}
                       </tbody>
                     </table>
-                  </div>
-                )}
-                
-                {/* Official Signatures Header - ONLY VISIBLE DURING EXPORT */}
-                {isExportingRankings && (
-                  <div className="mt-16 pt-8 flex items-end justify-between px-12 pb-4">
-                    <div className="flex flex-col items-center">
-                      <div className="w-48 border-b-2 border-gray-800 flex justify-center items-end h-16">
-                        {classTeacherSignature && <img src={classTeacherSignature} alt="Class Teacher" className="max-h-16 object-contain mb-1" />}
-                      </div>
-                      <span className="mt-3 text-xs font-bold uppercase tracking-wider text-gray-500">Class Teacher</span>
-                    </div>
-                    
-                    <div className="flex flex-col items-center">
-                      <div className="w-48 border-b-2 border-gray-800 flex justify-center items-end h-16">
-                        {principalSignature && <img src={principalSignature} alt="Principal" className="max-h-16 object-contain mb-1" />}
-                      </div>
-                      <span className="mt-3 text-xs font-bold uppercase tracking-wider text-gray-500">Principal</span>
-                    </div>
                   </div>
                 )}
               </div>
