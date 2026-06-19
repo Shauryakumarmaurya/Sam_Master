@@ -39,6 +39,8 @@ export default function GradebookModal() {
   const [isDownloading, setIsDownloading] = useState(false);
   const [shareLinkCopied, setShareLinkCopied] = useState(false);
   const [isGeneratingLink, setIsGeneratingLink] = useState(false);
+  const [isBulkDownloading, setIsBulkDownloading] = useState(false);
+  const [bulkProgress, setBulkProgress] = useState(0);
   const [rankingsExamFilter, setRankingsExamFilter] = useState('all');
   const reportCardRef = useRef(null);
   const reportWrapperRef = useRef(null);
@@ -250,6 +252,81 @@ export default function GradebookModal() {
     setTimeout(() => {
       handleDownloadPDF(studentId);
     }, 150);
+  };
+
+  const handleDownloadAllZip = async () => {
+    if (!students || students.length === 0) return;
+    setIsBulkDownloading(true);
+    setBulkProgress(0);
+    setActiveTab('report'); // Need report tab active to render the DOM nodes
+
+    try {
+      const JSZip = (await import('jszip')).default;
+      const zip = new JSZip();
+
+      for (let i = 0; i < students.length; i++) {
+        const student = students[i];
+        setSelectedStudentId(student.id);
+        
+        // Wait for React to render the specific student's report card
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
+        if (!reportCardRef.current) continue;
+        const element = reportCardRef.current;
+        const targetWidth = Math.max(element.scrollWidth, 794);
+        const targetHeight = element.scrollHeight;
+
+        const imgData = await htmlToImage.toPng(element, { 
+          quality: 1, 
+          pixelRatio: 2,
+          width: targetWidth,
+          height: targetHeight,
+          style: { width: `${targetWidth}px`, height: `${targetHeight}px`, transform: 'none', margin: '0' },
+          backgroundColor: '#ffffff',
+          filter: (node) => !(node.classList && node.classList.contains('no-print'))
+        });
+        
+        const pdf = new jsPDF(targetWidth > targetHeight ? 'l' : 'p', 'mm', 'a4');
+        const imgProps = pdf.getImageProperties(imgData);
+        let pdfWidth = pdf.internal.pageSize.getWidth();
+        let pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+        
+        const maxPdfHeight = pdf.internal.pageSize.getHeight();
+        if (pdfHeight > maxPdfHeight) {
+          const ratio = maxPdfHeight / pdfHeight;
+          pdfHeight = maxPdfHeight;
+          pdfWidth = pdfWidth * ratio;
+        }
+        
+        const xOffset = (pdf.internal.pageSize.getWidth() - pdfWidth) / 2;
+        pdf.addImage(imgData, 'PNG', xOffset, 0, pdfWidth, pdfHeight);
+        
+        const filename = `${student.name.replace(/[^a-z0-9]/gi, '_')}_Report_Card.pdf`;
+        zip.file(filename, pdf.output('blob'));
+        
+        setBulkProgress(i + 1);
+      }
+
+      const zipBlob = await zip.generateAsync({ type: 'blob' });
+      const zipFile = new File([zipBlob], 'Class_Report_Cards.zip', { type: 'application/zip' });
+      
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [zipFile] })) {
+        await navigator.share({ files: [zipFile], title: 'Class Report Cards' });
+      } else {
+        const url = URL.createObjectURL(zipBlob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'Class_Report_Cards.zip';
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+    } catch (error) {
+      console.error('Bulk download error:', error);
+      alert('Failed to generate bulk ZIP. Please try again.');
+    } finally {
+      setIsBulkDownloading(false);
+      setBulkProgress(0);
+    }
   };
 
   return (
@@ -798,7 +875,7 @@ export default function GradebookModal() {
               <div className="rounded-xl border border-gray-200 bg-white p-4 sm:p-6 shadow-sm">
                 
                 {/* Highlighted Mobile-Friendly Filter Bar */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4 bg-purple-50/80 p-4 rounded-xl border-2 border-purple-100 shadow-inner">
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-6 gap-4 bg-purple-50/80 p-4 rounded-xl border-2 border-purple-100 shadow-inner">
                   <div className="flex items-center gap-2 text-purple-900">
                     <div className="bg-purple-200 p-1.5 rounded-lg">
                       <svg className="w-5 h-5 text-purple-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -808,28 +885,53 @@ export default function GradebookModal() {
                     <h3 className="text-lg font-extrabold tracking-tight">Class Rankings</h3>
                   </div>
                   
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
-                    <label htmlFor="rankingsFilter" className="text-sm font-bold text-purple-800 whitespace-nowrap hidden sm:block">
-                      Show rankings for:
-                    </label>
-                    <div className="relative w-full sm:w-auto">
-                      <select
-                        id="rankingsFilter"
-                        value={rankingsExamFilter}
-                        onChange={(e) => setRankingsExamFilter(e.target.value)}
-                        className="appearance-none w-full sm:w-[280px] rounded-lg border-2 border-purple-200 bg-white px-4 py-2.5 pr-10 text-sm font-bold text-purple-900 shadow-sm outline-none focus:border-purple-600 focus:ring-4 focus:ring-purple-600/20 transition-all cursor-pointer"
-                      >
-                        <option value="all">🏆 Overall (All Exams Combined)</option>
-                        {exams.map(ex => (
-                          <option key={ex.id} value={ex.id}>📝 {ex.name}</option>
-                        ))}
-                      </select>
-                      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-purple-500">
-                        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
-                        </svg>
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full lg:w-auto">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto">
+                      <label htmlFor="rankingsFilter" className="text-sm font-bold text-purple-800 whitespace-nowrap hidden sm:block">
+                        Show rankings for:
+                      </label>
+                      <div className="relative w-full sm:w-auto">
+                        <select
+                          id="rankingsFilter"
+                          value={rankingsExamFilter}
+                          onChange={(e) => setRankingsExamFilter(e.target.value)}
+                          className="appearance-none w-full sm:w-[220px] rounded-lg border-2 border-purple-200 bg-white px-4 py-2.5 pr-10 text-sm font-bold text-purple-900 shadow-sm outline-none focus:border-purple-600 focus:ring-4 focus:ring-purple-600/20 transition-all cursor-pointer"
+                        >
+                          <option value="all">🏆 Overall</option>
+                          {exams.map(ex => (
+                            <option key={ex.id} value={ex.id}>📝 {ex.name}</option>
+                          ))}
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-purple-500">
+                          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </div>
                       </div>
                     </div>
+
+                    <button
+                      onClick={handleDownloadAllZip}
+                      disabled={isBulkDownloading || students.length === 0}
+                      className="inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors w-full sm:w-auto whitespace-nowrap"
+                    >
+                      {isBulkDownloading ? (
+                        <>
+                          <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          Zipping ({bulkProgress}/{students.length})
+                        </>
+                      ) : (
+                        <>
+                          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                          </svg>
+                          Download All (.zip)
+                        </>
+                      )}
+                    </button>
                   </div>
                 </div>
                 
