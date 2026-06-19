@@ -826,14 +826,14 @@ export default function GradebookModal() {
                 {students.length === 0 ? (
                   <p className="text-sm text-gray-500">No students found in the roster.</p>
                 ) : (
-                  <div className="overflow-x-auto rounded-lg border border-gray-200">
-                    <table className="w-full text-left text-sm text-gray-600 min-w-[600px]">
+                  <div className="overflow-hidden rounded-lg border border-gray-200">
+                    <table className="w-full text-left text-xs sm:text-sm text-gray-600">
                       <thead className="bg-gray-50 text-gray-700">
                         <tr>
-                          <th className="px-4 py-3 font-semibold">Rank</th>
-                          <th className="px-4 py-3 font-semibold">Student Name</th>
-                          <th className="px-4 py-3 font-semibold text-right">Total Score</th>
-                          <th className="px-4 py-3 font-semibold text-right">Percentage</th>
+                          <th className="px-2 sm:px-4 py-2 sm:py-3 font-semibold w-12 sm:w-auto">Rank</th>
+                          <th className="px-2 sm:px-4 py-2 sm:py-3 font-semibold truncate max-w-[100px] sm:max-w-none">Student</th>
+                          <th className="px-2 sm:px-4 py-2 sm:py-3 font-semibold text-right">Score</th>
+                          <th className="px-2 sm:px-4 py-2 sm:py-3 font-semibold text-right"><span className="hidden sm:inline">Percentage</span><span className="sm:hidden">%</span></th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100">
@@ -865,11 +865,11 @@ export default function GradebookModal() {
                             
                             return (
                               <tr key={student.id} className={`hover:bg-gray-50 ${currentRank === 1 && student.grandScore > 0 ? 'bg-amber-50/30' : ''}`}>
-                                <td className="px-4 py-3 font-medium">
+                                <td className="px-2 sm:px-4 py-2 sm:py-3 font-medium">
                                   {student.grandScore === 0 ? (
                                     <span className="text-gray-400">-</span>
                                   ) : isTop3 ? (
-                                    <span className={`inline-flex items-center justify-center h-6 w-6 rounded-full font-bold text-xs ${
+                                    <span className={`inline-flex items-center justify-center h-5 w-5 sm:h-6 sm:w-6 rounded-full font-bold text-[10px] sm:text-xs ${
                                       currentRank === 1 ? 'bg-amber-100 text-amber-700' :
                                       currentRank === 2 ? 'bg-gray-200 text-gray-700' :
                                       'bg-orange-100 text-orange-700'
@@ -877,17 +877,17 @@ export default function GradebookModal() {
                                       {currentRank}
                                     </span>
                                   ) : (
-                                    <span className="text-gray-600">#{currentRank}</span>
+                                    <span className="text-gray-600 text-[10px] sm:text-sm">#{currentRank}</span>
                                   )}
                                 </td>
-                                <td className={`px-4 py-3 ${isTop3 ? 'font-bold text-gray-900' : 'font-medium text-gray-800'}`}>
+                                <td className={`px-2 sm:px-4 py-2 sm:py-3 truncate max-w-[100px] sm:max-w-none ${isTop3 ? 'font-bold text-gray-900' : 'font-medium text-gray-800'}`}>
                                   {student.name}
                                 </td>
-                                <td className="px-4 py-3 text-right font-medium text-gray-900">
-                                  {student.grandScore} <span className="text-xs text-gray-400">/ {student.grandMax}</span>
+                                <td className="px-2 sm:px-4 py-2 sm:py-3 text-right font-medium text-gray-900 text-[11px] sm:text-sm">
+                                  {student.grandScore} <span className="text-[10px] sm:text-xs text-gray-400">/ {student.grandMax}</span>
                                 </td>
-                                <td className="px-4 py-3 text-right">
-                                  <span className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-bold ring-1 ring-inset ${
+                                <td className="px-2 sm:px-4 py-2 sm:py-3 text-right">
+                                  <span className={`inline-flex items-center rounded-md px-1.5 sm:px-2 py-0.5 sm:py-1 text-[10px] sm:text-xs font-bold ring-1 ring-inset ${
                                     student.percent >= 40 ? 'bg-green-50 text-green-700 ring-green-600/20' : 
                                     student.percent > 0 ? 'bg-red-50 text-red-700 ring-red-600/20' : 'bg-gray-50 text-gray-500 ring-gray-200'
                                   }`}>
