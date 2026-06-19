@@ -38,6 +38,7 @@ export default function GradebookModal() {
   const [selectedStudentId, setSelectedStudentId] = useState('');
   const [isDownloading, setIsDownloading] = useState(false);
   const [shareLinkCopied, setShareLinkCopied] = useState(false);
+  const [isGeneratingLink, setIsGeneratingLink] = useState(false);
   const reportCardRef = useRef(null);
   const reportWrapperRef = useRef(null);
   const [reportScale, setReportScale] = useState(1);
@@ -71,35 +72,68 @@ export default function GradebookModal() {
     }
   }, [activeTab, selectedStudentId]);
 
-  const handleGenerateShareLink = () => {
+  const handleGenerateShareLink = async () => {
     if (!selectedExamId || !selectedSubjectId || students.length === 0) return;
     
-    const examObj = exams.find(e => e.id === selectedExamId);
-    const subjectObj = subjects.find(s => s.id === selectedSubjectId);
-    
-    const payload = {
-      examId: selectedExamId,
-      examName: examObj?.name || 'Exam',
-      maxMarks: examObj?.maxMarks || 100,
-      subjectId: selectedSubjectId,
-      subjectName: subjectObj?.name || 'Subject',
-      students: students.map(s => ({ id: s.id, name: s.name })),
-      existingGrades: students.reduce((acc, s) => {
-        const score = examGrades[selectedExamId]?.[selectedSubjectId]?.[s.id];
-        if (score) acc[s.id] = score;
-        return acc;
-      }, {})
-    };
-    
-    const encodedPayload = btoa(encodeURIComponent(JSON.stringify(payload)));
-    const shareUrl = `${window.location.origin}/share?payload=${encodedPayload}`;
-    
-    navigator.clipboard.writeText(shareUrl).then(() => {
-      setShareLinkCopied(true);
-      setTimeout(() => setShareLinkCopied(false), 3000);
-    }).catch(() => {
-      alert("Failed to copy link. Please check browser permissions.");
-    });
+    setIsGeneratingLink(true);
+    try {
+      const examObj = exams.find(e => e.id === selectedExamId);
+      const subjectObj = subjects.find(s => s.id === selectedSubjectId);
+      
+      const payload = {
+        examId: selectedExamId,
+        examName: examObj?.name || 'Exam',
+        maxMarks: examObj?.maxMarks || 100,
+        subjectId: selectedSubjectId,
+        subjectName: subjectObj?.name || 'Subject',
+        students: students.map(s => ({ id: s.id, name: s.name })),
+        existingGrades: students.reduce((acc, s) => {
+          const score = examGrades[selectedExamId]?.[selectedSubjectId]?.[s.id];
+          if (score) acc[s.id] = score;
+          return acc;
+        }, {})
+      };
+      
+      const encodedPayload = btoa(encodeURIComponent(JSON.stringify(payload)));
+      const fullUrl = `${window.location.origin}/share?payload=${encodedPayload}`;
+      
+      let shareUrl = fullUrl;
+      try {
+        const res = await fetch('/api/shorten', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: fullUrl })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.shortUrl) shareUrl = data.shortUrl;
+        }
+      } catch (err) {
+        console.error('Failed to shorten url, falling back to full url', err);
+      }
+      
+      const shareData = {
+        title: `Grade Entry: ${subjectObj?.name}`,
+        text: `Please enter marks for ${subjectObj?.name} (${examObj?.name}) using this link:`,
+        url: shareUrl
+      };
+      
+      if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+        await navigator.share(shareData);
+        setShareLinkCopied(true);
+        setTimeout(() => setShareLinkCopied(false), 3000);
+      } else {
+        await navigator.clipboard.writeText(shareUrl);
+        setShareLinkCopied(true);
+        setTimeout(() => setShareLinkCopied(false), 3000);
+      }
+    } catch (err) {
+      if (err.name !== 'AbortError') {
+        alert("Failed to share link. Please check browser permissions.");
+      }
+    } finally {
+      setIsGeneratingLink(false);
+    }
   };
 
   const handleSignatureUpload = (e, setter) => {
@@ -350,14 +384,23 @@ export default function GradebookModal() {
                 {selectedExamId && selectedSubjectId && students.length > 0 && (
                   <button
                     onClick={handleGenerateShareLink}
-                    className="flex items-center gap-2 rounded-md bg-purple-100 px-4 py-2 text-sm font-medium text-purple-700 hover:bg-purple-200 transition-colors whitespace-nowrap border border-purple-200"
+                    disabled={isGeneratingLink}
+                    className="flex items-center gap-2 rounded-md bg-purple-100 px-4 py-2 text-sm font-medium text-purple-700 hover:bg-purple-200 transition-colors whitespace-nowrap border border-purple-200 disabled:opacity-50"
                   >
-                    {shareLinkCopied ? (
+                    {isGeneratingLink ? (
+                      <>
+                        <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Generating...
+                      </>
+                    ) : shareLinkCopied ? (
                       <>
                         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                         </svg>
-                        Copied!
+                        Shared!
                       </>
                     ) : (
                       <>
