@@ -42,8 +42,10 @@ export default function GradebookModal() {
   const [isBulkDownloading, setIsBulkDownloading] = useState(false);
   const [bulkProgress, setBulkProgress] = useState(0);
   const [rankingsExamFilter, setRankingsExamFilter] = useState('all');
+  const [isExportingRankings, setIsExportingRankings] = useState(false);
   const reportCardRef = useRef(null);
   const reportWrapperRef = useRef(null);
+  const rankingsRef = useRef(null);
   const [reportScale, setReportScale] = useState(1);
 
   useEffect(() => {
@@ -323,64 +325,61 @@ export default function GradebookModal() {
     } catch (error) {
       console.error('Bulk download error:', error);
       alert('Failed to generate bulk ZIP. Please try again.');
-    } finally {
-      setIsBulkDownloading(false);
-      setBulkProgress(0);
-    }
-  };
+  const exportRankingsToPDF = async () => {
+    if (!rankingsRef.current || students.length === 0) return;
+    setIsExportingRankings(true);
 
-  const exportRankingsToCSV = () => {
-    if (!students || students.length === 0) return;
+    try {
+      const element = rankingsRef.current;
+      const targetWidth = Math.max(element.scrollWidth, 794);
+      const targetHeight = element.scrollHeight;
 
-    const filteredExams = rankingsExamFilter === 'all' ? exams : exams.filter(e => e.id === rankingsExamFilter);
-    
-    const rankedStudents = students.map(student => {
-      let grandScore = 0;
-      let grandMax = 0;
-      filteredExams.forEach(ex => {
-        subjects.forEach(sub => {
-          const score = examGrades[ex.id]?.[sub.id]?.[student.id];
-          if (score) {
-            grandScore += Number(score);
-            grandMax += (ex.maxMarks || 100);
-          }
-        });
+      const imgData = await htmlToImage.toPng(element, { 
+        quality: 1, 
+        pixelRatio: 2,
+        width: targetWidth,
+        height: targetHeight,
+        style: { width: `${targetWidth}px`, height: `${targetHeight}px`, transform: 'none', margin: '0' },
+        backgroundColor: '#ffffff',
+        filter: (node) => !(node.classList && node.classList.contains('no-print'))
       });
-      return { ...student, grandScore, grandMax, percent: grandMax > 0 ? (grandScore / grandMax) * 100 : 0 };
-    }).sort((a, b) => b.grandScore - a.grandScore);
-
-    let currentRank = 1;
-    const csvRows = [];
-    csvRows.push(['Rank', 'Student Name', 'Total Score', 'Max Score', 'Percentage', 'Status']);
-
-    rankedStudents.forEach((student, index) => {
-      if (index > 0 && student.grandScore < rankedStudents[index - 1].grandScore) {
-        currentRank = index + 1;
-      }
-      const rankStr = student.grandScore === 0 ? '-' : currentRank;
-      const passFail = student.percent >= 33 ? 'Pass' : (student.grandScore > 0 ? 'Fail' : 'N/A');
       
-      csvRows.push([
-        rankStr,
-        `"${student.name.replace(/"/g, '""')}"`,
-        student.grandScore,
-        student.grandMax,
-        `${Math.round(student.percent)}%`,
-        passFail
-      ]);
-    });
-
-    const csvContent = csvRows.map(e => e.join(",")).join("\n");
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    const filterName = rankingsExamFilter === 'all' ? 'Overall' : exams.find(e => e.id === rankingsExamFilter)?.name || 'Filtered';
-    link.setAttribute("href", url);
-    link.setAttribute("download", `Class_Rankings_${filterName.replace(/[^a-z0-9]/gi, '_')}.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+      const pdf = new jsPDF(targetWidth > targetHeight ? 'l' : 'p', 'mm', 'a4');
+      const imgProps = pdf.getImageProperties(imgData);
+      let pdfWidth = pdf.internal.pageSize.getWidth();
+      let pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      
+      const maxPdfHeight = pdf.internal.pageSize.getHeight();
+      if (pdfHeight > maxPdfHeight) {
+        const ratio = maxPdfHeight / pdfHeight;
+        pdfHeight = maxPdfHeight;
+        pdfWidth = pdfWidth * ratio;
+      }
+      
+      const xOffset = (pdf.internal.pageSize.getWidth() - pdfWidth) / 2;
+      pdf.addImage(imgData, 'PNG', xOffset, 0, pdfWidth, pdfHeight);
+      
+      const filterName = rankingsExamFilter === 'all' ? 'Overall' : exams.find(e => e.id === rankingsExamFilter)?.name || 'Filtered';
+      const filename = `Class_Rankings_${filterName.replace(/[^a-z0-9]/gi, '_')}.pdf`;
+      
+      try {
+        const blob = pdf.output('blob');
+        const file = new File([blob], filename, { type: 'application/pdf' });
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({ files: [file], title: filename });
+        } else {
+          pdf.save(filename);
+        }
+      } catch (err) {
+        console.error('Share error:', err);
+        if (err.name !== 'AbortError') pdf.save(filename);
+      }
+    } catch (error) {
+      console.error('Failed to export rankings PDF', error);
+      alert('Failed to generate PDF. Please try again.');
+    } finally {
+      setIsExportingRankings(false);
+    }
   };
 
   return (
@@ -926,7 +925,7 @@ export default function GradebookModal() {
           {/* TAB: RANKINGS */}
           {activeTab === 'rankings' && (
             <div className="mx-auto max-w-4xl space-y-6">
-              <div className="rounded-xl border border-gray-200 bg-white p-4 sm:p-6 shadow-sm">
+              <div ref={rankingsRef} className="rounded-xl border border-gray-200 bg-white p-4 sm:p-6 shadow-sm">
                 
                 {/* Highlighted Mobile-Friendly Filter Bar */}
                 <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-6 gap-4 bg-purple-50/80 p-4 rounded-xl border-2 border-purple-100 shadow-inner">
@@ -964,16 +963,28 @@ export default function GradebookModal() {
                       </div>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full lg:w-auto">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full lg:w-auto no-print">
                       <button
-                        onClick={exportRankingsToCSV}
-                        disabled={students.length === 0}
+                        onClick={exportRankingsToPDF}
+                        disabled={students.length === 0 || isExportingRankings}
                         className="inline-flex items-center justify-center gap-2 rounded-lg bg-green-50 text-green-700 px-4 py-2.5 text-sm font-bold shadow-sm hover:bg-green-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors w-full sm:w-auto whitespace-nowrap border border-green-200"
                       >
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                        Export CSV
+                        {isExportingRankings ? (
+                          <>
+                            <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Exporting...
+                          </>
+                        ) : (
+                          <>
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
+                            Download PDF
+                          </>
+                        )}
                       </button>
 
                       <button
