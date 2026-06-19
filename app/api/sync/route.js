@@ -10,7 +10,7 @@ export async function GET() {
   }
   
   try {
-    const res = await fetch(`${supabaseUrl}/rest/v1/sam_sync_grades?select=*&order=timestamp.desc&limit=50`, {
+    const res = await fetch(`${supabaseUrl}/rest/v1/sam_sync_grades?select=*&examId=neq.SHARE_LINK&order=timestamp.desc&limit=50`, {
       headers: {
         'apikey': supabaseKey,
         'Authorization': `Bearer ${supabaseKey}`

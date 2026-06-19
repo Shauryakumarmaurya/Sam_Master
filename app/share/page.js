@@ -12,19 +12,40 @@ function ShareGradingContent() {
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
   useEffect(() => {
-    const rawPayload = searchParams.get('payload');
-    if (rawPayload) {
-      try {
-        const decoded = JSON.parse(decodeURIComponent(atob(rawPayload)));
-        setPayload(decoded);
-        setGrades(decoded.existingGrades || {});
-      } catch (err) {
-        console.error("Failed to decode payload", err);
+    const fetchPayload = async () => {
+      const id = searchParams.get('id');
+      const rawPayload = searchParams.get('payload');
+      
+      if (id) {
+        try {
+          const res = await fetch(`/api/share?id=${id}`);
+          if (res.ok) {
+            const data = await res.json();
+            setPayload(data.payload);
+            setGrades(data.payload.existingGrades || {});
+          } else {
+            setError(true);
+          }
+        } catch (err) {
+          console.error("Failed to fetch share payload", err);
+          setError(true);
+        }
+      } else if (rawPayload) {
+        // Legacy fallback
+        try {
+          const decoded = JSON.parse(decodeURIComponent(atob(rawPayload)));
+          setPayload(decoded);
+          setGrades(decoded.existingGrades || {});
+        } catch (err) {
+          console.error("Failed to decode payload", err);
+          setError(true);
+        }
+      } else {
         setError(true);
       }
-    } else {
-      setError(true);
-    }
+    };
+    
+    fetchPayload();
   }, [searchParams]);
 
   const handleSubmitGrades = async () => {

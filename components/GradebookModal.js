@@ -94,22 +94,27 @@ export default function GradebookModal() {
         }, {})
       };
       
-      const encodedPayload = btoa(encodeURIComponent(JSON.stringify(payload)));
-      const fullUrl = `${window.location.origin}/share?payload=${encodedPayload}`;
-      
-      let shareUrl = fullUrl;
+      let shareUrl;
       try {
-        const res = await fetch('/api/shorten', {
+        const res = await fetch('/api/share', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url: fullUrl })
+          body: JSON.stringify(payload)
         });
         if (res.ok) {
           const data = await res.json();
-          if (data.shortUrl) shareUrl = data.shortUrl;
+          if (data.id) {
+            shareUrl = `${window.location.origin}/share?id=${data.id}`;
+          } else {
+            throw new Error("No ID returned");
+          }
+        } else {
+          throw new Error("API failed");
         }
       } catch (err) {
-        console.error('Failed to shorten url, falling back to full url', err);
+        console.error('Failed to generate internal share link, falling back to legacy long link', err);
+        const encodedPayload = btoa(encodeURIComponent(JSON.stringify(payload)));
+        shareUrl = `${window.location.origin}/share?payload=${encodedPayload}`;
       }
       
       const shareData = {
