@@ -329,6 +329,60 @@ export default function GradebookModal() {
     }
   };
 
+  const exportRankingsToCSV = () => {
+    if (!students || students.length === 0) return;
+
+    const filteredExams = rankingsExamFilter === 'all' ? exams : exams.filter(e => e.id === rankingsExamFilter);
+    
+    const rankedStudents = students.map(student => {
+      let grandScore = 0;
+      let grandMax = 0;
+      filteredExams.forEach(ex => {
+        subjects.forEach(sub => {
+          const score = examGrades[ex.id]?.[sub.id]?.[student.id];
+          if (score) {
+            grandScore += Number(score);
+            grandMax += (ex.maxMarks || 100);
+          }
+        });
+      });
+      return { ...student, grandScore, grandMax, percent: grandMax > 0 ? (grandScore / grandMax) * 100 : 0 };
+    }).sort((a, b) => b.grandScore - a.grandScore);
+
+    let currentRank = 1;
+    const csvRows = [];
+    csvRows.push(['Rank', 'Student Name', 'Total Score', 'Max Score', 'Percentage', 'Status']);
+
+    rankedStudents.forEach((student, index) => {
+      if (index > 0 && student.grandScore < rankedStudents[index - 1].grandScore) {
+        currentRank = index + 1;
+      }
+      const rankStr = student.grandScore === 0 ? '-' : currentRank;
+      const passFail = student.percent >= 33 ? 'Pass' : (student.grandScore > 0 ? 'Fail' : 'N/A');
+      
+      csvRows.push([
+        rankStr,
+        `"${student.name.replace(/"/g, '""')}"`,
+        student.grandScore,
+        student.grandMax,
+        `${Math.round(student.percent)}%`,
+        passFail
+      ]);
+    });
+
+    const csvContent = csvRows.map(e => e.join(",")).join("\n");
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    const filterName = rankingsExamFilter === 'all' ? 'Overall' : exams.find(e => e.id === rankingsExamFilter)?.name || 'Filtered';
+    link.setAttribute("href", url);
+    link.setAttribute("download", `Class_Rankings_${filterName.replace(/[^a-z0-9]/gi, '_')}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-white p-0">
       <div className="flex h-full w-full flex-col overflow-hidden">
@@ -910,11 +964,23 @@ export default function GradebookModal() {
                       </div>
                     </div>
 
-                    <button
-                      onClick={handleDownloadAllZip}
-                      disabled={isBulkDownloading || students.length === 0}
-                      className="inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors w-full sm:w-auto whitespace-nowrap"
-                    >
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full lg:w-auto">
+                      <button
+                        onClick={exportRankingsToCSV}
+                        disabled={students.length === 0}
+                        className="inline-flex items-center justify-center gap-2 rounded-lg bg-green-50 text-green-700 px-4 py-2.5 text-sm font-bold shadow-sm hover:bg-green-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors w-full sm:w-auto whitespace-nowrap border border-green-200"
+                      >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        Export CSV
+                      </button>
+
+                      <button
+                        onClick={handleDownloadAllZip}
+                        disabled={isBulkDownloading || students.length === 0}
+                        className="inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors w-full sm:w-auto whitespace-nowrap"
+                      >
                       {isBulkDownloading ? (
                         <>
                           <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
