@@ -785,22 +785,41 @@ export default function GradebookModal() {
           {/* TAB: RANKINGS */}
           {activeTab === 'rankings' && (
             <div className="mx-auto max-w-4xl space-y-6">
-              <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
-                  <h3 className="text-xl font-bold text-gray-900">Class Rankings</h3>
-                  <div className="flex items-center gap-2">
-                    <label htmlFor="rankingsFilter" className="text-sm font-medium text-gray-700">Filter by Exam:</label>
-                    <select
-                      id="rankingsFilter"
-                      value={rankingsExamFilter}
-                      onChange={(e) => setRankingsExamFilter(e.target.value)}
-                      className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-900 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
-                    >
-                      <option value="all">Overall (All Exams)</option>
-                      {exams.map(ex => (
-                        <option key={ex.id} value={ex.id}>{ex.name}</option>
-                      ))}
-                    </select>
+              <div className="rounded-xl border border-gray-200 bg-white p-4 sm:p-6 shadow-sm">
+                
+                {/* Highlighted Mobile-Friendly Filter Bar */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4 bg-purple-50/80 p-4 rounded-xl border-2 border-purple-100 shadow-inner">
+                  <div className="flex items-center gap-2 text-purple-900">
+                    <div className="bg-purple-200 p-1.5 rounded-lg">
+                      <svg className="w-5 h-5 text-purple-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                      </svg>
+                    </div>
+                    <h3 className="text-lg font-extrabold tracking-tight">Class Rankings</h3>
+                  </div>
+                  
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
+                    <label htmlFor="rankingsFilter" className="text-sm font-bold text-purple-800 whitespace-nowrap hidden sm:block">
+                      Show rankings for:
+                    </label>
+                    <div className="relative w-full sm:w-auto">
+                      <select
+                        id="rankingsFilter"
+                        value={rankingsExamFilter}
+                        onChange={(e) => setRankingsExamFilter(e.target.value)}
+                        className="appearance-none w-full sm:w-[280px] rounded-lg border-2 border-purple-200 bg-white px-4 py-2.5 pr-10 text-sm font-bold text-purple-900 shadow-sm outline-none focus:border-purple-600 focus:ring-4 focus:ring-purple-600/20 transition-all cursor-pointer"
+                      >
+                        <option value="all">🏆 Overall (All Exams Combined)</option>
+                        {exams.map(ex => (
+                          <option key={ex.id} value={ex.id}>📝 {ex.name}</option>
+                        ))}
+                      </select>
+                      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-purple-500">
+                        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </div>
+                    </div>
                   </div>
                 </div>
                 
