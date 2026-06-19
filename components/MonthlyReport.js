@@ -279,5 +279,6 @@ export default function MonthlyReport() {
         </div>
       </div>
     </div>
+  </div>
   );
 }
