@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { useApp } from './AppProvider';
 import { useModalHistory } from '@/hooks/useModalHistory';
-import { useCallback } from 'react';
+import { jsPDF } from 'jspdf';
+import * as htmlToImage from 'html-to-image';
 import {
   getWorkingDays,
   getWorkingDateKeys,
@@ -20,6 +21,8 @@ export default function MonthlyReport() {
   const now = new Date();
   const [reportYear, setReportYear] = useState(now.getFullYear());
   const [reportMonth, setReportMonth] = useState(now.getMonth());
+  const [isDownloading, setIsDownloading] = useState(false);
+  const reportRef = useRef(null);
 
   if (!showReport) return null;
 
@@ -64,6 +67,78 @@ export default function MonthlyReport() {
     yearOptions.push(y);
   }
 
+  const handleDownloadPDF = async () => {
+    if (!reportRef.current) return;
+    setIsDownloading(true);
+    try {
+      const element = reportRef.current;
+      const targetWidth = Math.max(element.scrollWidth, 794);
+      const targetHeight = element.scrollHeight;
+
+      const imgData = await htmlToImage.toPng(element, { 
+        quality: 1, 
+        pixelRatio: 2,
+        width: targetWidth,
+        height: targetHeight,
+        style: {
+          width: `${targetWidth}px`,
+          height: `${targetHeight}px`,
+          transform: 'none',
+          margin: '0'
+        },
+        backgroundColor: '#ffffff',
+        filter: (node) => {
+          if (node.classList && node.classList.contains('no-print')) {
+            return false;
+          }
+          return true;
+        }
+      });
+      
+      const pdf = new jsPDF(targetWidth > targetHeight ? 'l' : 'p', 'mm', 'a4');
+      const imgProps = pdf.getImageProperties(imgData);
+      
+      let pdfWidth = pdf.internal.pageSize.getWidth();
+      let pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      
+      const maxPdfHeight = pdf.internal.pageSize.getHeight();
+      if (pdfHeight > maxPdfHeight) {
+        const ratio = maxPdfHeight / pdfHeight;
+        pdfHeight = maxPdfHeight;
+        pdfWidth = pdfWidth * ratio;
+      }
+      
+      const xOffset = (pdf.internal.pageSize.getWidth() - pdfWidth) / 2;
+      
+      pdf.addImage(imgData, 'PNG', xOffset, 0, pdfWidth, pdfHeight);
+      const filename = `Monthly_Report_${MONTH_NAMES[reportMonth]}_${reportYear}.pdf`;
+      
+      try {
+        const blob = pdf.output('blob');
+        const file = new File([blob], filename, { type: 'application/pdf' });
+        
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title: filename,
+          });
+        } else {
+          pdf.save(filename);
+        }
+      } catch (err) {
+        console.error('Share/Save error:', err);
+        if (err.name !== 'AbortError') {
+          pdf.save(filename);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to generate PDF', error);
+      alert('Failed to generate PDF. Please try again.');
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
@@ -73,7 +148,26 @@ export default function MonthlyReport() {
       <div className="relative max-h-[85vh] w-full max-w-2xl overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
-          <h2 className="text-base font-semibold text-gray-900">Monthly Report</h2>
+          <div className="flex items-center gap-4">
+            <h2 className="text-base font-semibold text-gray-900">Monthly Report</h2>
+            <button
+              onClick={handleDownloadPDF}
+              disabled={isDownloading}
+              className="flex items-center gap-1.5 rounded bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700 hover:bg-indigo-100 transition-colors disabled:opacity-50 no-print"
+            >
+              {isDownloading ? (
+                <svg className="h-3 w-3 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              ) : (
+                <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                </svg>
+              )}
+              {isDownloading ? 'Exporting...' : 'Export PDF'}
+            </button>
+          </div>
           <button
             onClick={closeReport}
             className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-900 transition-colors"
@@ -86,8 +180,9 @@ export default function MonthlyReport() {
         </div>
 
         <div className="overflow-y-auto max-h-[calc(85vh-65px)] p-6 custom-scrollbar">
-          {/* Month selector */}
-          <div className="mb-5 flex items-center gap-3">
+          <div ref={reportRef} className="bg-white p-2">
+            {/* Month selector */}
+            <div className="mb-5 flex items-center gap-3 no-print">
             <label className="text-xs font-medium text-gray-500">Period:</label>
             <select
               id="select-report-month"
